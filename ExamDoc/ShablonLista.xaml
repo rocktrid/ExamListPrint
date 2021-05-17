@@ -1,0 +1,90 @@
+﻿<Page x:Class="ExamDoc.ShablonLista"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:ExamDoc"
+      mc:Ignorable="d" 
+      d:DesignHeight="600" d:DesignWidth="550"
+      Title="ShablonLista">
+
+    <Grid Background="White">
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Padding="20"/>
+                <TextBlock Name="Lab1" Text="Министерство образования Нижегородской области" FontFamily="Times New Roman" FontSize="16" HorizontalAlignment="Center"/>
+                <TextBlock Name="Lab2" Text="Государственное бюджетное профессиональное" FontFamily="Times New Roman" FontSize="16" HorizontalAlignment="Center"/>
+                <TextBlock Name="Lab3" Text="образовательное учреждение" FontFamily="Times New Roman" FontSize="16" HorizontalAlignment="Center"/>
+                <TextBlock Name="Lab4" Text="«Нижегородский Губернский колледж»" FontFamily="Times New Roman" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="" Padding="5"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical">
+                <TextBlock Name="Lab5" Text="Очное отделение" FontFamily="Times New Roman" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Name="TypeOfExam" Text="Пересдача" HorizontalAlignment="Right" Margin="0,0,40,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                <TextBlock Name="TypeOfExamData" Text="text" HorizontalAlignment="Right" Margin="0,0,40,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Name="ReceiptForExam" Margin="144,0,0,0" Text="НАПРАВЛЕНИЕ НА ПЕРЕСДАЧУ № " FontFamily="Times New Roman" FontSize="14" FontWeight="Bold" />
+                    <TextBlock Name="ForIdExam" Text="NoExam" FontWeight="Bold" FontFamily="Times New Roman" FontSize="14"/>
+                </StackPanel>
+                <TextBlock Text="(для сдачи комплексного экзамена вне группы," FontFamily="Times New Roman" FontSize="14" HorizontalAlignment="Center"/>
+                <TextBlock Text="подшивается к основной ведомости группы)" FontFamily="Times New Roman" FontSize="14" HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical" >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Группа" Margin="40,30,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Name="GroupData" Margin="0,30,0,0" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Дисциплина" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Name="DisciplineData" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Экзаменатор" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Name="TeacherData" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Фамилия И.О. студента:" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Name="StudFLPNameData" Text="__________"  Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Направление действительно до" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Name="DateOfExpirationData" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Дата выдачи" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Name="DateOfAquiring" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Зав. отделением" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Name="ExamHead" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Оценка" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Text="________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Text="Дата Сдачи" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Name="DateOfExamData" Text="_________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Подписи экзаменатора" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                        <TextBlock Text="_______________________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+
+                    </StackPanel>
+
+                    
+                    
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
+    </Grid>
+</Page>

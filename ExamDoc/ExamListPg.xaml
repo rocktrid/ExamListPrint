@@ -1,0 +1,71 @@
+﻿<Page x:Class="ExamDoc.ExamListPg"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:ExamDoc"
+      mc:Ignorable="d" 
+      d:DesignHeight="650" d:DesignWidth="600"
+      Title="ExamListPg">
+
+    <Grid Background="White">
+        <StackPanel x:Name="MainStackPan" Orientation="Vertical">
+            <StackPanel Name="SearchStackPan" Orientation="Vertical">
+                <TextBlock Text="Введите ФИО студента по форме:" HorizontalAlignment="Center" Margin="0,10,0,20"/>
+                <TextBlock Text="Иванов Иван Иванович" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                <TextBox Name ="Search_Name" Width="300"/>
+                <Button Name="Check_Name" Content="Найти студента" Click="Check_Name_Click" Width="100" Height="50" Margin="0,20,0,20"/>
+            </StackPanel>
+            <StackPanel Name="FormStackPan" Orientation="Vertical" Visibility="Visible">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Вид" Margin="0,0,160,0" Padding="5"/>
+                    <TextBlock Name="TypeOfExam" Width="100"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Группа" Margin="0,0,140,0" Padding="5"/>
+                    <TextBox Name="StudGroupTb" Width="50" BorderThickness="0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Name="StudFLPNames" Text="ФИО Студента" Margin="0,0,100,0" Padding="5"/>
+                    <TextBox Name="ForStudFLPNames" Width="300"  BorderThickness="0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Дисциплина" Margin="0,0,105,0" Padding="5"/>
+                    <ComboBox Name="StudDisciplCb" Width="300" DropDownClosed="StudDisciplCb_DropDownClosed" >
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Name="Examinator1Tb" Text="Экзаменатор" Margin="0,0,93,0" Padding="5"/>
+                    <CheckBox Name="IfCoupleOfExaminators" Checked="IfCoupleOfExaminators_Checked">
+                        <CheckBox.ToolTip>
+                            <ToolTip> Если экзаменаторов больше одного, нажмите на чекбокс</ToolTip>
+                        </CheckBox.ToolTip>
+                    </CheckBox>
+                    <ComboBox Name ="StudExamPersonTb" BorderThickness="0" Width="200"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Name="IfExaminatorsMoreThatOne" Visibility="Collapsed">
+                    <TextBlock Name="Examinator2Tb" Text="Экзаменатор 2" Margin="0,0,100,0" Padding="5"/>
+                    <ComboBox Name ="StudExamPersonTb1" BorderThickness="0" Width="200"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Name="IfExaminatorsMoreThatOne1" Visibility="Collapsed">
+                    <TextBlock Name="Examinator3Tb" Text="Экзаменатор 3" Margin="0,0,100,0" Padding="5"/>
+                    <ComboBox Name ="StudExamPersonTb2" BorderThickness="0" Width="200"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Зав. отделением" Margin="0,0,90,0" Padding="5"/>
+                    <ComboBox Name="HeadMasterNameCb" BorderThickness="0" Width="200"/>
+
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Дата сдачи" Padding="5" Margin="0,0,120,0"/>
+                    <Button Name="UnlockCalendar" Content="Выбрать дату"  Width="100" Click="UnlockCalendar_Click"/>
+                    <Calendar Name="DateOfExamCalendar"  Visibility="Collapsed" SelectedDatesChanged="DateOfExamCalendar_SelectedDatesChanged"/>
+                </StackPanel>
+                <StackPanel>
+                    <Button x:Name="ToPrint" Width="100" Height="50" Content="Продолжить" Click="ToPrint_Click" Margin="450,0,0,0" VerticalAlignment="Bottom" Visibility="Visible"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Page>
