@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:ExamDoc"
       mc:Ignorable="d" 
-      d:DesignHeight="650" d:DesignWidth="600"
+      d:DesignHeight="700" d:DesignWidth="600"
       Title="ExamListPg">
 
     <Grid Background="White">
@@ -63,7 +63,7 @@
                     <Calendar Name="DateOfExamCalendar"  Visibility="Collapsed" SelectedDatesChanged="DateOfExamCalendar_SelectedDatesChanged"/>
                 </StackPanel>
                 <StackPanel>
-                    <Button x:Name="ToPrint" Width="100" Height="50" Content="Продолжить" Click="ToPrint_Click" Margin="450,0,0,0" VerticalAlignment="Bottom" Visibility="Visible"/>
+                    <Button x:Name="ToPrint" Width="100" Height="50" Content="Занести в базу" Click="ToPrint_Click" Margin="450,0,0,0" VerticalAlignment="Bottom" Visibility="Visible"/>
                 </StackPanel>
             </StackPanel>
         </StackPanel>

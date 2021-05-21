@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:ExamDoc"
       mc:Ignorable="d" 
-    d:DesignHeight="600" d:DesignWidth="550"
+    d:DesignHeight="700" d:DesignWidth="550"
       Title="ListExamForTwoExaminators">
 
     <Grid Background="White">
@@ -81,14 +81,10 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Подписи экзаменатора" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
                         <TextBlock Text="_______________________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
-
                     </StackPanel>
-
-
-
                 </StackPanel>
             </StackPanel>
-
+            <Button Name="Print" Width="150" Height="50" HorizontalAlignment="Right" Content="Печать" Click="Print_Click" />
         </StackPanel>
     </Grid>
 </Page>

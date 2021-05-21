@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExamDoc"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="600">
+        Title="MainWindow" Height="700" Width="600">
     <Grid>
-        <Frame Name="ForWindows"/>
+        <Frame Name="ForWindows" NavigationUIVisibility="Hidden"/>
     </Grid>
 </Window>

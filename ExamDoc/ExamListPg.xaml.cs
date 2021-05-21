@@ -94,6 +94,7 @@ namespace ExamDoc
             public int idStud { get; set; } // id студента
             public int idTypeExam { get; set; } //определяет тип
         }
+        List<ForExamCheck> ExamChecker = new List<ForExamCheck>();
         public ExamListPg()
         {
             InitializeComponent();
@@ -103,59 +104,40 @@ namespace ExamDoc
         ///
         private void ToPrint_Click(object sender, RoutedEventArgs e)
         {
+            string Query;
+            int TypeOfList = 0;
+            //if (IfCoupleOfExaminators.IsChecked == true)
+            //{
+            //    Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam, ExamListsRegistTeacherid3, ExamListsRegistTeacherid2) VALUES(";
+            //}
+            //else
+            //{
+            //    Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam) VALUES(";
 
-            //Конверт из wpf В xps
-            MemoryStream lMemoryStream = new MemoryStream(); // поток для чтения wpf
-            Package package = Package.Open(lMemoryStream, FileMode.Create); //забиваем wpf в контейнер
-            XpsDocument doc = new XpsDocument(package); //представление wpf в xps документ
-            XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc); // запись wpf в xps
-            writer.Write(this); //записывает текущее окно в xps
-            doc.Close(); //закрывает представление
-            package.Close(); //закрывает контейнер
-            // Конвертируем xps в pdf
-            MemoryStream outStream = new MemoryStream(); //поток для pdf
-            PdfSharp.Xps.XpsConverter.Convert(lMemoryStream, outStream, false); //конвертация потока xps в поток pdf с закрытием потока pdf после 
-            // Запись в pdf
-            string CheckName = "";
-            string StudName = string.Empty;
-            string savepath = string.Empty;
-            SaveFileDialog SaveFile = new SaveFileDialog
-            {
-                Filter = "PDF (*.pdf)|*.pdf",
-                FileName = "Допуск на пересдачу" + StudName +".pdf"
-            };
-            if (SaveFile.ShowDialog() == DialogResult.OK)
-            {
-                savepath = System.IO.Path.GetFullPath(SaveFile.FileName);
-                System.Windows.MessageBox.Show("Данные экспортируются в документ");
-                if (File.Exists(CheckName))
-                {
-                    try
+            //}
+            //using (MySqlConnection conn = new MySqlConnection(OpenConnection)) // подключение для добавление данных в БД
+            //{
+            //    try
+            //    {
+            //        MySqlCommand cmd = new MySqlCommand(Query, conn);
+            //        conn.Open();
+            //        cmd.ExecuteNonQuery();
+            //        System.Windows.MessageBox.Show("Данные добавлены!");
+                    if(TypeOfList==0)
                     {
-                        File.Delete(CheckName);
+                        ForFrames.MyFrames.Navigate(new ShablonLista());
+                    }
+                    else
+                    {
+                        ForFrames.MyFrames.Navigate(new ListExamForTwoExaminators());
+                    }
+                
+                //catch (Exception ex)
+                //{
+                //    System.Windows.MessageBox.Show("" + ex);
+                //}
 
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Windows.MessageBox.Show("Ошибка: " + ex.Message);
-                    }
-                }
-            }
-            if (savepath != null)
-            {
-                FileStream fileStream = new FileStream(savepath, FileMode.Create); //поток для записи документа
-                outStream.CopyTo(fileStream); //поток pdf копируется по месту filestream
-                System.Windows.MessageBox.Show("Документ создан");
-                // Очистка потока outstream
-                outStream.Flush(); //чистит буфер потока
-                outStream.Close(); //закрывает буфер потока
-                fileStream.Flush(); //чистит буфер потока
-                fileStream.Close(); //закрывает буфер потока
-            }
-            else
-            {
-                System.Windows.MessageBox.Show("путь не выбран, повторите снова");
-            }
+            
         }
         /// <summary>
         /// подключение к БД ака основной метод, где вложена куча операций, для предварительного вывода данных из БД
@@ -208,7 +190,7 @@ namespace ExamDoc
                         IdStudent = st.idStud;
                         ForStudFLPNames.Text = NameStud;
                         ForSrch.Clear();
-                        string QueryForExamSrch = "Select ExamListsRegistStudid, ExamListsRegistStudid FROM examlistsregist"; //строка для запроса на поиск были ли у студента пересдачи
+                        string QueryForExamSrch = "Select ExamListsRegistStudid, examlistsregistTypeOfExam FROM examlistsregist"; //строка для запроса на поиск были ли у студента пересдачи
                         MySqlCommand Finder = new MySqlCommand(QueryForExamSrch, BaseConn.BuildConnection);
                         MySqlDataReader DataReader = Finder.ExecuteReader();
                         DTable = new DataTable();
@@ -217,7 +199,7 @@ namespace ExamDoc
                         foreach (DataRow D in ToSrchExams) // добавляю новую позицию в лист
                         {
                             object[] O = D.ItemArray;
-                            ToSrchExams.Add(new ForExamCheck()
+                            ExamChecker.Add(new ForExamCheck()
                             {
                                 idStud = (int)O[0],
                                 idTypeExam = (int)O[1]                             
@@ -227,7 +209,7 @@ namespace ExamDoc
                         string q = string.Empty;
                         int counter = 0; //счетчик для поиска количества вхождения результатов. Необходим если студент в первый раз пересдает и его нет в списках переэкзаменовки
                         // поиск по реестру экзаменов студента и его пересдачи
-                        foreach (ForExamCheck fec in ToSrchExams) 
+                        foreach (ForExamCheck fec in ExamChecker) 
                         { 
                             if (fec.idStud == IdStudent)
                             {
@@ -424,15 +406,18 @@ namespace ExamDoc
     /// <summary>
     /// Структура для добавления записей в БД + на форму для печати
     /// </summary>
-    struct ListForExam
-    {
-        public int NoOfExamList { get; set; }
-        public string Group { get; set; }
-        public string Discipline { get; set; }
-        public string FLPnameStudent { get; set; }
-        public string DateOfExpiration { get; set; }
-        public string DateOfClaiming { get; set; }
-        public string ExamHead { get; set; }
-        public string DateOfExam { get; set; }
-    }
+    //struct ListForExam
+    //{
+    //    public int NoOfExamList { get; set; }
+    //    public string Group { get; set; }
+    //    public string Discipline { get; set; }
+    //    public string FLPnameStudent { get; set; }
+    //    public string DateOfExpiration { get; set; }
+    //    public string DateOfClaiming { get; set; }
+    //    public string ExamHead { get; set; }
+    //    public string DateOfExam { get; set; }
+    //    public int TeacherId { get; set; }
+    //    public int Teacher2Id { get; set; }
+    //    public int Teacher3Id { get; set; }
+    //}
 }
