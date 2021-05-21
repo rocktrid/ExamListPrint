@@ -20,6 +20,8 @@ using PdfSharp;
 using System.Printing;
 using System.Windows.Xps;
 using System.Windows.Xps.Packaging;
+using MySql.Data.MySqlClient;
+using System.Data;
 
 namespace ExamDoc
 {
@@ -28,12 +30,78 @@ namespace ExamDoc
     /// </summary>
     public partial class ShablonLista : Page
     {
+        DataTable DTable;
+        struct ExamData
+        {
+            public int idExamListsRegist { get; set; }
+            public int ExamListsRegistTeacherid { get; set; }
+            public int? ExamListsRegistTeacherid2 { get; set; }
+            public int? ExamListsRegistTeacherid3 { get; set; }
+            public int ExamListsRegistDisciplineid { get; set; }
+            public int? ExamListsRegistSecondDisciplineid { get; set; }
+            public int ExamListsRegistStudid { get; set; }
+            public int examlistsregistTypeOfExam { get; set; }
+            public DateTime DateOfExam { get; set; }
+            public DateTime DateOfApproving { get; set; }
+            public DateTime ExpirationDate { get; set; }
+        };
+        List<ExamData> ExDt = new List<ExamData>();
         public ShablonLista()
         {
             InitializeComponent();
-        }
-        // Конверт из wpf В xps
+            //подключение к БД
+            String ConnectionToBase = "Database = diplomalocalserver; Data Source = 127.0.0.1; User Id = root; Password = Password";
+            BaseConn.BuildConnection = new MySqlConnection(ConnectionToBase);
+            BaseConn.BuildConnection.Open();
+            //получение данных с последней строки таблицы и помещение её в struct
+            string Query = "SELECT * FROM examlistsregist ORDER BY idExamListsRegist DESC LIMIT 1"; // по идее, должно вывести самую первую позицию снизу aka последняя добавленная запись
+            MySqlCommand Selecter = new MySqlCommand(Query, BaseConn.BuildConnection);
+            MySqlDataReader DataReader = Selecter.ExecuteReader();
+            DTable = new DataTable();
+            DTable.Load(DataReader);
+            DataRowCollection PosSelection = DTable.Rows;
+            foreach (DataRow D in PosSelection) // новая позиция в листе
+            {
+                try
+                {
+                    object[] O = D.ItemArray;
+                    ExDt.Add(new ExamData()
+                    {
+                        //DBNull.Value ? null : (int?)O[n] а также приравнивание в структурах к int? необходимо, если есть null значения в таблицах  
+                        idExamListsRegist = (int)O[0],
+                        ExamListsRegistTeacherid = (int)O[1],
+                        ExamListsRegistTeacherid2 = O[2] == DBNull.Value ? null : (int?)O[2],
+                        ExamListsRegistTeacherid3 = O[3] == DBNull.Value ? null : (int?)O[3],
+                        ExamListsRegistDisciplineid = (int)O[4],
+                        ExamListsRegistSecondDisciplineid = O[5] == DBNull.Value ? null : (int?)O[5],
+                        ExamListsRegistStudid = (int)O[6],
+                        examlistsregistTypeOfExam = (int)O[7],
+                        DateOfExam = (DateTime)O[8],
+                        DateOfApproving = (DateTime)O[9],
+                        ExpirationDate = (DateTime)O[10]
+                    }
+                    );
 
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show("Ошибка " + ex);
+                }
+            }
+            {
+                ForIdExam.Text = ExDt[0].idExamListsRegist.ToString();
+                DateOfExamData.Text = ExDt[0].DateOfExam.ToString("d/MM/yyy");
+                DateOfAquiring.Text = ExDt[0].DateOfApproving.ToString("d/MM/yyy");
+                DateOfExpirationData.Text = ExDt[0].ExpirationDate.ToString("d/MM/yyy");
+
+
+            }
+            // однако, это лишь добавит idшники из таблицы. Надо перевести их в данные
+            // ну че, брутфорс. На каждый id надо сделать запрос на выборку и замену на string
+            string Query1 = "SELECT * FROM "; 
+        }
+
+        // Конверт из wpf В xps
         private void Print_Click(object sender, RoutedEventArgs e)
         {
             Print.Visibility = Visibility.Collapsed;

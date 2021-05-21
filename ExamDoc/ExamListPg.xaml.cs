@@ -37,15 +37,19 @@ namespace ExamDoc
         // сохранить имя, чтобы перенести в форму
         public string NameStud;
         // сохранить id чтобы проверить его в таблице с переэкзаменовками и для получения наименования группы
-        public int IdStudent; 
+        public int IdStudent;
         //Поиск по группе
         public int IdGroup;
         // поиск учителя по id
-        public int TeachId;
+        public int TeachId;  
+        ///<summary>
+        ///для регистрации переэкзаменовки в БД
+        /// </summary>
+
         /// <summary>
         /// для будущего поиска по ФИО
         /// </summary>
-        struct ForStudSearching 
+        struct ForStudSearching
         {
             public int idStud { get; set; }
             public string Fname { get; set; }
@@ -89,7 +93,7 @@ namespace ExamDoc
         /// <summary>
         /// поиск по количеству пересдач, для автоматического добавления типа пересдачи
         /// </summary>
-        struct ForExamCheck 
+        struct ForExamCheck
         {
             public int idStud { get; set; } // id студента
             public int idTypeExam { get; set; } //определяет тип
@@ -106,39 +110,52 @@ namespace ExamDoc
         {
             string Query;
             int TypeOfList = 0;
-            //if (IfCoupleOfExaminators.IsChecked == true)
-            //{
-            //    Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam, ExamListsRegistTeacherid3, ExamListsRegistTeacherid2) VALUES(";
-            //}
-            //else
-            //{
-            //    Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam) VALUES(";
+            if (IfCoupleOfExaminators.IsChecked == true)
+            {
+                Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam, ExamListsRegistTeacherid3, ExamListsRegistTeacherid2) VALUES(";
+                TypeOfList = 1;
+            }
+            else if (IfCoupleDisciplines.IsChecked == true)
+            {
+                TypeOfList = 2;
+                Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam) VALUES(";
 
-            //}
-            //using (MySqlConnection conn = new MySqlConnection(OpenConnection)) // подключение для добавление данных в БД
-            //{
-            //    try
-            //    {
-            //        MySqlCommand cmd = new MySqlCommand(Query, conn);
-            //        conn.Open();
-            //        cmd.ExecuteNonQuery();
-            //        System.Windows.MessageBox.Show("Данные добавлены!");
-                    if(TypeOfList==0)
-                    {
-                        ForFrames.MyFrames.Navigate(new ShablonLista());
-                    }
-                    else
-                    {
-                        ForFrames.MyFrames.Navigate(new ListExamForTwoExaminators());
-                    }
-                
-                //catch (Exception ex)
-                //{
-                //    System.Windows.MessageBox.Show("" + ex);
-                //}
+            }
+            else
+            {
+                Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam)"+
+             "VALUES(@ExamListsRegistTeacherid, @ExamListsRegistDisciplineid, @ExamListsRegistStudid, @DateOfExam, @DateOfApproving, @ExpirationDate, @examlistsregistTypeOfExam)";
 
-            
+
+            }
+            if (TypeOfList == 0)
+            {
+                try
+                {
+                    MySqlCommand cmd = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    BaseConn.BuildConnection.Open();
+                    cmd.Parameters.AddWithValue("@ExamListRegistTeacherid",null);
+                    cmd.ExecuteNonQuery();
+                    System.Windows.MessageBox.Show("Данные добавлены!");
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show("Ошибка "+ex);
+
+                }
+                ForFrames.MyFrames.Navigate(new ShablonLista());
+            }
+            else
+            {
+                ForFrames.MyFrames.Navigate(new ListExamForTwoExaminators());
+            }
+
+            //catch (Exception ex)
+            //{
+            //    System.Windows.MessageBox.Show("" + ex);
+            //}
         }
+
         /// <summary>
         /// подключение к БД ака основной метод, где вложена куча операций, для предварительного вывода данных из БД
         /// </summary>
@@ -403,21 +420,4 @@ namespace ExamDoc
             DateTime Today = DateTime.Today;
         }
     }
-    /// <summary>
-    /// Структура для добавления записей в БД + на форму для печати
-    /// </summary>
-    //struct ListForExam
-    //{
-    //    public int NoOfExamList { get; set; }
-    //    public string Group { get; set; }
-    //    public string Discipline { get; set; }
-    //    public string FLPnameStudent { get; set; }
-    //    public string DateOfExpiration { get; set; }
-    //    public string DateOfClaiming { get; set; }
-    //    public string ExamHead { get; set; }
-    //    public string DateOfExam { get; set; }
-    //    public int TeacherId { get; set; }
-    //    public int Teacher2Id { get; set; }
-    //    public int Teacher3Id { get; set; }
-    //}
 }
