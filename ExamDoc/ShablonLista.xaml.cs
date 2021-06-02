@@ -77,16 +77,16 @@ namespace ExamDoc
                         ExamListsHeadMasterId = (int)O[8]
                     }
                     );
-
                 }
                 catch (Exception ex)
                 {
                     System.Windows.MessageBox.Show("Ошибка " + ex);
                 }
             }
+
+            try
             {
-                //
-                if (ExDt[0].ExamListsRegistStudid == ExDt[1].ExamListsRegistStudid && ExDt[0].DateOfApproving == ExDt[1].DateOfApproving) // если если есть две записи подряд по одному студенту (то будет иная форма для печати). Дополнительно проверяю дату аппрува, чтоб наверняка
+                if (ExDt[0].ExamListsRegistStudid == ExDt[1].ExamListsRegistStudid) // если если есть две записи подряд по одному студенту (то будет иная форма для печати). Дополнительно проверяю дату аппрува, чтоб наверняка
                 {
                     // тут будет сцепка первой дисциплины со второй дисциплиной через запятую
                     Query = "SELECT idDisciplines, DisciplineDescription FROM disciplines";
@@ -133,9 +133,70 @@ namespace ExamDoc
                         object[] O = D.ItemArray;
                         if ((int)O[0] == ExDt[1].ExamListsRegistTeacherid)
                         {
-                            TeacherData.Text += ", \r"+ (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                            TeacherData.Text += ", \r" + (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
                         }
                     }
+                    foreach (DataRow D in TeachersFind)
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsHeadMasterId)
+                        {
+                            ExamHead.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                        }
+                    }
+                    Query = "SELECT * FROM studentslist";
+                    MySqlCommand StudSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader Stud = StudSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(Stud);
+                    DataRowCollection StudFind = DTable.Rows;
+                    Query = "SELECT * FROM groupslist";
+                    MySqlCommand GroupSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader Group = GroupSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(Group);
+                    DataRowCollection GroupFind = DTable.Rows;
+                    foreach (DataRow D in StudFind) // первый проход, чтобы найти студиков
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsRegistStudid)
+                        {
+                            DateOfAquiring.Text = ExDt[0].DateOfApproving.ToString("d/MM/yyy");
+                            DateOfExpirationData.Text = ExDt[0].ExpirationDate.ToString("d/MM/yyy");
+                            ForIdExam.Text = ExDt[0].idExamListsRegist.ToString();
+                            StudFLPNameData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                            foreach (DataRow S in GroupFind) // здесь же найдем и его группу
+                            {
+                                object[] P = S.ItemArray;
+                                if ((int)P[0] == (int)O[5])
+                                {
+                                    GroupData.Text = (string)P[1];
+                                }
+                            }
+                        }
+                    }
+                    Query = "SELECT * FROM examtypes";
+                    MySqlCommand ExamTypeSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader ExamType = ExamTypeSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(ExamType);
+                    DataRowCollection ExamTypeFind = DTable.Rows;
+                    foreach (DataRow V in ExamTypeFind)
+                    {
+                        object[] Q = V.ItemArray;
+                        if (ExDt[0].examlistsregistTypeOfExam == (int)V[0])
+                        {
+                            TypeOfExamData1.Text = (string)V[1];
+
+                        }
+                        if (ExDt[1].examlistsregistTypeOfExam == (int)V[0])
+                        {
+                            ForSecondDiscType.Visibility = Visibility.Visible;
+                            TypeOfExamData2.Text = (string)V[1];
+                        }
+                    }
+
+
                 }
 
                 else
@@ -171,23 +232,74 @@ namespace ExamDoc
                             TeacherData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
                         }
                     }
-                    foreach (DataRow D in TeachersFind)  // второй проход, чтобы найти второго препода
+
+                    Query = "SELECT * FROM teacherlist";
+                    MySqlCommand HeadMasterSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader HeadSearch = HeadMasterSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(HeadSearch);
+                    DataRowCollection HeadMFind = DTable.Rows;
+                    foreach (DataRow D in HeadMFind) // первый проход, чтобы найти первого препода
                     {
                         object[] O = D.ItemArray;
-                        if ((int)O[0] == ExDt[1].ExamListsRegistTeacherid)
+                        if ((int)O[0] == ExDt[0].ExamListsHeadMasterId)
                         {
-                            TeacherData.Text += ", \r" + (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                            ExamHead.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                        }
+                    }
+                    Query = "SELECT * FROM studentslist";
+                    MySqlCommand StudSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader Stud = StudSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(Stud);
+                    DataRowCollection StudFind = DTable.Rows;
+                    Query = "SELECT * FROM groupslist";
+                    MySqlCommand GroupSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader Group = GroupSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(Group);
+                    DataRowCollection GroupFind = DTable.Rows;
+                    Query = "SELECT * FROM examtypes";
+                    MySqlCommand ExamTypeSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader ExamType = ExamTypeSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(ExamType);
+                    DataRowCollection ExamTypeFind = DTable.Rows;
+                    foreach (DataRow D in StudFind) // первый проход, чтобы найти первого препода
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsRegistStudid)
+                        {
+                            DateOfAquiring.Text = ExDt[0].DateOfApproving.ToString("d/MM/yyy");
+                            DateOfExpirationData.Text = ExDt[0].ExpirationDate.ToString("d/MM/yyy");
+                            ForIdExam.Text = ExDt[0].idExamListsRegist.ToString();
+                            StudFLPNameData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3]; //нашли студика
+                            foreach (DataRow S in GroupFind) // здесь же найдем и его группу
+                            {
+                                object[] P = S.ItemArray;
+                                if ((int)P[0] == (int)O[5])
+                                {
+                                    GroupData.Text = (string)P[1];
+                                }
+                            }
+                            foreach (DataRow V in ExamTypeFind)
+                            {
+                                object[] Q = V.ItemArray;
+                                if (ExDt[0].examlistsregistTypeOfExam == (int)V[0])
+                                {
+                                    TypeOfExamData1.Text = (string)V[1];
+                                }
+                            }
                         }
                     }
                 }
-                //
-                
-                ForIdExam.Text = ExDt[0].idExamListsRegist.ToString();
-                //DateOfExamData.Text = ExDt[0].DateOfExam.ToString("d/MM/yyy");//
-                DateOfAquiring.Text = ExDt[0].DateOfApproving.ToString("d/MM/yyy");
-                DateOfExpirationData.Text = ExDt[0].ExpirationDate.ToString("d/MM/yyy");
             }
-        }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("" + ex);
+            }
+            }
+        
         // Конверт из wpf В xps
         private void Print_Click(object sender, RoutedEventArgs e)
         {
@@ -227,22 +339,29 @@ namespace ExamDoc
                         System.Windows.MessageBox.Show("Ошибка: " + ex.Message);
                     }
                 }
+                if (savepath != null)
+                {
+                    FileStream fileStream = new FileStream(savepath, FileMode.Create); //поток для записи документа
+                    outStream.CopyTo(fileStream); //поток pdf копируется по месту filestream
+                    System.Windows.MessageBox.Show("Документ создан");
+                    // Очистка потока outstream
+                    outStream.Flush(); //чистит буфер потока
+                    outStream.Close(); //закрывает буфер потока
+                    fileStream.Flush(); //чистит буфер потока
+                    fileStream.Close(); //закрывает буфер потока
+                }
             }
-            if (savepath != null)
-            {
-                FileStream fileStream = new FileStream(savepath, FileMode.Create); //поток для записи документа
-                outStream.CopyTo(fileStream); //поток pdf копируется по месту filestream
-                System.Windows.MessageBox.Show("Документ создан");
-                // Очистка потока outstream
-                outStream.Flush(); //чистит буфер потока
-                outStream.Close(); //закрывает буфер потока
-                fileStream.Flush(); //чистит буфер потока
-                fileStream.Close(); //закрывает буфер потока
-            }
+
             else
             {
                 System.Windows.MessageBox.Show("путь не выбран, повторите снова");
             }
+        }
+
+        private void GoBack_Click(object sender, RoutedEventArgs e)
+        {
+            ForFrames.MyFrames.GoBack();
+
         }
     }
 }
