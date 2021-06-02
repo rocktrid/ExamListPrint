@@ -48,7 +48,7 @@ namespace ExamDoc
         {
             InitializeComponent();
             //подключение к БД
-            String ConnectionToBase = "Database = diplomalocalserver; Data Source = 127.0.0.1; User Id = root; Password = Password"; //после миграции поменять строку
+            String ConnectionToBase = "server=ngknn.ru; port=20009; port =20009; user=allowed; database=allowed; User Id = allowed; Password = KemOW4seYumi"; //после миграции поменять строку
             BaseConn.BuildConnection = new MySqlConnection(ConnectionToBase);
             BaseConn.BuildConnection.Open();
             //получение данных с последней строки таблицы и помещение её в struct
@@ -304,6 +304,7 @@ namespace ExamDoc
         private void Print_Click(object sender, RoutedEventArgs e)
         {
             Print.Visibility = Visibility.Collapsed;
+            GoBack.Visibility = Visibility.Collapsed;
             MemoryStream lMemoryStream = new MemoryStream(); // поток для чтения wpf
             Package package = Package.Open(lMemoryStream, FileMode.Create); //забиваем wpf в контейнер
             XpsDocument doc = new XpsDocument(package); //представление wpf в xps документ
@@ -356,6 +357,8 @@ namespace ExamDoc
             {
                 System.Windows.MessageBox.Show("путь не выбран, повторите снова");
             }
+            GoBack.Visibility = Visibility.Visible;
+
         }
 
         private void GoBack_Click(object sender, RoutedEventArgs e)

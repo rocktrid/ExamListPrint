@@ -42,8 +42,8 @@
                     <ComboBox Name="StudDisciplCb2" Width="200" DropDownClosed ="StudDisciplCb2_DropDownClosed" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Name="Examinator1Tb" Text="Экзаменатор" Margin="0,0,93,0" Padding="5"/>
-                    <ComboBox Name ="StudExamPersonTb" Width="200" Margin="8,0,0,0"/>
+                    <TextBlock Name="Examinator1Tb" Text="Экзаменатор" Margin="0,0,93,0" Padding="5" Visibility="Collapsed"/>
+                    <ComboBox Name ="StudExamPersonTb" Width="200" Margin="8,0,0,0" Visibility="Collapsed"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Name="IfExaminatorsMoreThatOne" Visibility="Collapsed">
                     <TextBlock Name="Examinator2Tb" Text="Экзаменатор 2" Margin="0,0,93,0" Padding="5"/>
@@ -51,8 +51,8 @@
                 </StackPanel>
                 
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Зав. отделением" Margin="0,0,82,0" Padding="5"/>
-                    <ComboBox Name="HeadMasterNameCb"  Width="200"/>
+                    <TextBlock Name="ForColl2" Text="Зав. отделением" Margin="0,0,82,0" Padding="5" Visibility="Collapsed"/>
+                    <ComboBox Name="HeadMasterNameCb"  Width="200" Visibility="Collapsed"/>
 
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">

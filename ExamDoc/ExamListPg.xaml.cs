@@ -32,7 +32,7 @@ namespace ExamDoc
     public partial class ExamListPg : Page
     {
         // собснно, сам адрес сервера.
-        private readonly string OpenConnection = "Database = diplomalocalserver; Data Source = 127.0.0.1; User Id = root; Password = Password";
+        private readonly string OpenConnection = "server=ngknn.ru; port=20009; port =20009; user=allowed; database=allowed; User Id = allowed; Password = KemOW4seYumi";
         // сохранить id чтобы проверить его в таблице с переэкзаменовками и для получения наименования группы
         public int IdStudent;
         int zav = 0; //сохранить id заведующего
@@ -148,6 +148,8 @@ namespace ExamDoc
             {
                 HeadMasterNameCb.Visibility = Visibility.Visible;
                 StudExamPersonTb.Visibility = Visibility.Visible;
+                Examinator1Tb.Visibility = Visibility.Visible;
+                ForColl2.Visibility = Visibility.Visible;
                 MethodToFindExamsCounters(1);
                 string str = StudDisciplCb.SelectedItem.ToString(); // строка с наименованием предмета для отсеивания
                 if (str != null) //получаем здесь код учителя, для поиска по БД
@@ -221,6 +223,7 @@ namespace ExamDoc
         {
             StudDisciplCb2.Items.Clear();
             ForVisibilityScndDiscpl.Visibility = Visibility.Collapsed;
+            StudExamPersonTb.Visibility = Visibility.Collapsed;
         }
         ///
         ///<summary>метод осуществляющий экзекут sql команды</summary>
