@@ -39,15 +39,16 @@
                         <TextBlock Text="Группа" Margin="40,30,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
                         <TextBlock Name="GroupData" Margin="0,30,0,0" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal" Name="ForFirstDiscipline">
                         <TextBlock Text="Дисциплина" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
-                        <TextBlock Name="DisciplineData" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
-
+                        <TextBlock Name="DisciplineData" Text="__________" Width="Auto" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Экзаменатор" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
                         <TextBlock Name="TeacherData" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
-
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Name="TeacherData1" Margin="125,0,0,0" Text="__________" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Фамилия И.О. студента:" Margin="40,0,0,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>

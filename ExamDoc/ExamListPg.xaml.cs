@@ -22,6 +22,7 @@ using System.Windows.Xps;
 using System.Windows.Xps.Packaging;
 using MySql.Data.MySqlClient;
 using System.Data;
+using System.Data.SqlClient;
 
 namespace ExamDoc
 {
@@ -32,20 +33,30 @@ namespace ExamDoc
     {
         // собснно, сам адрес сервера.
         private readonly string OpenConnection = "Database = diplomalocalserver; Data Source = 127.0.0.1; User Id = root; Password = Password";
-        // для таблицы временной
-        DataTable DTable;
-        // сохранить имя, чтобы перенести в форму
-        public string NameStud;
         // сохранить id чтобы проверить его в таблице с переэкзаменовками и для получения наименования группы
         public int IdStudent;
-        //Поиск по группе
-        public int IdGroup;
+        int[] CountReexams = new int[2];
         // поиск учителя по id
-        public int TeachId;  
-        ///<summary>
-        ///для регистрации переэкзаменовки в БД
+        public int TeachId;
+        ///
+        /// <summary>
+        /// Для добавления в БД
         /// </summary>
+        struct Insert
+        {
+            public int FirstTeacherId { get; set; }
+            public int SecondTeacherId { get; set; }
+            public int HeadM { get; set; }
+            public int FirstDisciplineId { get; set; }
+            public int StudId { get; set; }
+            public int ExamTypeId { get; set; }
+            public DateTime DateOfExpiration { get; set; }
+            public DateTime DateOfApproving { get; set; }
 
+
+        };
+        Insert NewInsert = new Insert();
+        /// 
         /// <summary>
         /// для будущего поиска по ФИО
         /// </summary>
@@ -96,75 +107,203 @@ namespace ExamDoc
         struct ForExamCheck
         {
             public int idStud { get; set; } // id студента
+            public int idFirstDiscipline { get; set; } // проверка по первой дисциплине
             public int idTypeExam { get; set; } //определяет тип
+
         }
         List<ForExamCheck> ExamChecker = new List<ForExamCheck>();
+
         public ExamListPg()
         {
             InitializeComponent();
         }
+
+        /// <summary>
+        /// переадресация на метод ChooseConnection, который найдет имя в БД
+        /// </summary>
+        private void Check_Name_Click(object sender, RoutedEventArgs e)
+        {
+
+            ChooseConnection(OpenConnection);
+        }
+        /// <summary>
+        /// Эвент, чтобы открыть календарик
+        /// </summary>
+        private void UnlockCalendar_Click(object sender, RoutedEventArgs e)
+        {
+            DateOfExamCalendar.Visibility = Visibility.Visible;
+            UnlockCalendar.Visibility = Visibility.Collapsed;
+        }
+        /// <summary>
+        /// при закрытии комбобокса, при наличии выбранной позиции, будет выполнено действие
+        /// </summary>
+        private void StudDisciplCb_DropDownClosed(object sender, EventArgs e)
+        {
+            StudExamPersonTb.Items.Clear();
+            if (StudDisciplCb.SelectedIndex != -1)
+            {
+                MethodToFindExamsCounters(1);
+                string str = StudDisciplCb.SelectedItem.ToString(); // строка с наименованием предмета для отсеивания
+                if (str != null) //получаем здесь код учителя, для поиска по БД
+                {
+                    for (int i = 0; i < DisciplinesList.Count; i++)
+                    {
+                        if (DisciplinesList[i].DisciplineDescr == str)
+                        {
+                            TeachId = DisciplinesList[i].DisciplineTeacher;
+                        }
+                    }
+                }
+                for (int i = 0; i + 1 <= Teachers.Count; i++)
+                {
+                    if (Teachers[i].TeacherId == TeachId)
+                    {
+                        StudExamPersonTb.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
+                    }
+                }
+            }
+
+        }
+        /// <summary>
+        /// Получение даты
+        /// </summary>
+        private void DateOfExamCalendar_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
+        {
+            NewInsert.DateOfApproving = DateTime.Today;
+            NewInsert.DateOfExpiration = (DateTime)DateOfExamCalendar.SelectedDate;
+
+            // далее добавить это в структуру
+        }
+
+        private void StudDisciplCb2_DropDownClosed(object sender, EventArgs e)
+        {
+            StudExamPersonTb1.Items.Clear();
+            if (StudDisciplCb2.SelectedIndex != -1)
+            {
+                string str = StudDisciplCb2.SelectedItem.ToString(); // строка с наименованием предмета для отсеивания
+                if (str != null) //получаем здесь код учителя, для поиска по БД
+                {
+                    for (int i = 0; i < DisciplinesList.Count; i++)
+                    {
+                        if (DisciplinesList[i].DisciplineDescr == str)
+                        {
+                            TeachId = DisciplinesList[i].DisciplineTeacher;
+                        }
+                    }
+                }
+
+                for (int i = 0; i + 1 <= Teachers.Count; i++)
+                {
+                    if (Teachers[i].TeacherId == TeachId)
+                    {
+                        StudExamPersonTb1.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
+                    }
+                }
+                MethodToFindExamsCounters(2);
+            }
+        }
+        private void IfCoupleDisciplines_Checked(object sender, RoutedEventArgs e)
+        {
+            ForVisibilityScndDiscpl.Visibility = Visibility.Visible;
+            IfExaminatorsMoreThatOne.Visibility = Visibility.Visible;
+
+        }
+        private void IfCoupleDisciplines_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ForVisibilityScndDiscpl.Visibility = Visibility.Collapsed;
+        }
         ///
-        /// метод для печати экрана в pdf
+        ///<summary>метод осуществляющий экзекут sql команды</summary>
+        ///
+        private void ExecSqlComm(bool a, DateTime? b, DateTime c)
+        {
+            try
+            {
+                MySqlCommand InsertCommand = new MySqlCommand("INSERT INTO examlistsregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid,"
+                                       + " ExamListsRegistStudid, examlistsregistTypeOfExam, DateOfApproving, ExpirationDate, ExamListsHeadMasterId)"
+                                       + " VALUES(@ExamListsRegistTeacherid, @ExamListsRegistDisciplineid,"
+                                       + " @ExamListsRegistStudid, @examlistsregistTypeOfExam, @DateOfApproving, @ExpirationDate, @ExamListsHeadMasterId)", BaseConn.BuildConnection);
+                InsertCommand.CommandType = CommandType.Text;
+
+                if (a == true) //т.е. если нет второй дисциплины
+                {
+                    InsertCommand.Parameters.AddWithValue("@ExamListsRegistTeacherid", NewInsert.FirstTeacherId);
+                    InsertCommand.Parameters.AddWithValue("@ExamListsRegistDisciplineid", StudDisciplCb.SelectedIndex + 1);
+                    InsertCommand.Parameters.AddWithValue("@ExamListsRegistStudid", NewInsert.StudId);
+                    InsertCommand.Parameters.AddWithValue("@examlistsregistTypeOfExam", CountReexams[0]);
+                    InsertCommand.Parameters.AddWithValue("@DateOfApproving", c);
+                    InsertCommand.Parameters.AddWithValue("@ExpirationDate", b);
+                    InsertCommand.Parameters.AddWithValue("@ExamListsHeadMasterId", NewInsert.HeadM);
+                    InsertCommand.ExecuteNonQuery();
+                    System.Windows.MessageBox.Show("Данные по первой пересдаче добавлены!");                                                      
+                }              
+                else
+                {
+
+                    //добавляется первая пересдача в БД по первой дисциплине
+                    InsertCommand.Parameters.AddWithValue("@ExamListsRegistTeacherid", NewInsert.FirstTeacherId);
+                    InsertCommand.Parameters.AddWithValue("@ExamListsRegistDisciplineid", StudDisciplCb.SelectedIndex + 1);
+                    InsertCommand.Parameters.AddWithValue("@ExamListsRegistStudid", NewInsert.StudId);
+                    InsertCommand.Parameters.AddWithValue("@examlistsregistTypeOfExam", CountReexams[0]);
+                    InsertCommand.Parameters.AddWithValue("@DateOfApproving", c);
+                    InsertCommand.Parameters.AddWithValue("@ExpirationDate", b);
+                    InsertCommand.Parameters.AddWithValue("@ExamListsHeadMasterId", NewInsert.HeadM);
+                    InsertCommand.ExecuteNonQuery();
+                    MySqlCommand InsertNewCommand = new MySqlCommand("INSERT INTO examlistsregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid,"
+                                       + " ExamListsRegistStudid, examlistsregistTypeOfExam, DateOfApproving, ExpirationDate, ExamListsHeadMasterId)"
+                                       + " VALUES(@ExamListsRegistTeacherid, @ExamListsRegistDisciplineid,"
+                                       + " @ExamListsRegistStudid, @examlistsregistTypeOfExam, @DateOfApproving, @ExpirationDate, @ExamListsHeadMasterId)", BaseConn.BuildConnection); ;
+                    InsertNewCommand.CommandType = CommandType.Text;
+                    //добавляется вторая пересдача в БД по второй дисциплине
+                    InsertNewCommand.Parameters.AddWithValue("@ExamListsRegistTeacherid", NewInsert.FirstTeacherId);
+                    InsertNewCommand.Parameters.AddWithValue("@ExamListsRegistDisciplineid", StudDisciplCb2.SelectedIndex+1);
+                    InsertNewCommand.Parameters.AddWithValue("@ExamListsRegistStudid", NewInsert.StudId);
+                    InsertNewCommand.Parameters.AddWithValue("@examlistsregistTypeOfExam", CountReexams[1]);
+                    InsertNewCommand.Parameters.AddWithValue("@DateOfApproving", c);
+                    InsertNewCommand.Parameters.AddWithValue("@ExpirationDate", b);
+                    InsertNewCommand.Parameters.AddWithValue("@ExamListsHeadMasterId", NewInsert.HeadM);
+                    InsertNewCommand.ExecuteNonQuery();
+                    System.Windows.MessageBox.Show("Данные по второй пересдаче добавлены!");
+                }
+            }
+                catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Ошибка " + ex);
+            }
+        }
+        ///
+        /// метод перехода на окно предварительного просмотра
         ///
         private void ToPrint_Click(object sender, RoutedEventArgs e)
         {
-            string Query;
-            int TypeOfList = 0;
-            if (IfCoupleOfExaminators.IsChecked == true)
+            DateTime? DT = DateOfExamCalendar.SelectedDate;
+            DateTime Today = DateTime.Today;
+            NewInsert.HeadM = HeadMasterNameCb.SelectedIndex + 1;
+            // а, всё ж можно сделать куда элегантнее. Я ж из комбобоксов значения беру. Вместо того, чтобы делать лишние структуры, можно просто индексами боксов воспользоваться. BigBrain
+            if (StudDisciplCb2.SelectedIndex + 1 == 0) // здесь на случай, если на одну дисциплину лист пересдачи. Да и вообще, вынести исполнение sql команды в отдельный метод, передав подобие флага как аргумент, чтобы было понятно по какому кол-ву дисциплин работать
             {
-                Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam, ExamListsRegistTeacherid3, ExamListsRegistTeacherid2) VALUES(";
-                TypeOfList = 1;
-            }
-            else if (IfCoupleDisciplines.IsChecked == true)
-            {
-                TypeOfList = 2;
-                Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam) VALUES(";
-
+                /// упд: не сработает с Заведующим, т.к. в списке будет их мало, а заведующие находятся с учителями вместе, но показываются в списке только заведующие. Кароч, не пошаманить с селектед индекс
+                ExecSqlComm(true, DT, Today);
             }
             else
             {
-                Query = "INSERT INTO examlistregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid, ExamListsRegistStudid, DateOfExam, DateOfApproving, ExpirationDate, examlistsregistTypeOfExam)"+
-             "VALUES(@ExamListsRegistTeacherid, @ExamListsRegistDisciplineid, @ExamListsRegistStudid, @DateOfExam, @DateOfApproving, @ExpirationDate, @examlistsregistTypeOfExam)";
-
-
+                ExecSqlComm(false, DT, Today);
             }
-            if (TypeOfList == 0)
-            {
-                try
-                {
-                    MySqlCommand cmd = new MySqlCommand(Query, BaseConn.BuildConnection);
-                    BaseConn.BuildConnection.Open();
-                    cmd.Parameters.AddWithValue("@ExamListRegistTeacherid",null);
-                    cmd.ExecuteNonQuery();
-                    System.Windows.MessageBox.Show("Данные добавлены!");
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show("Ошибка "+ex);
-
-                }
-                ForFrames.MyFrames.Navigate(new ShablonLista());
-            }
-            else
-            {
-                ForFrames.MyFrames.Navigate(new ListExamForTwoExaminators());
-            }
-
-            //catch (Exception ex)
-            //{
-            //    System.Windows.MessageBox.Show("" + ex);
-            //}
+            //
+            ForFrames.MyFrames.Navigate(new ShablonLista());
         }
-
         /// <summary>
         /// подключение к БД ака основной метод, где вложена куча операций, для предварительного вывода данных из БД
         /// </summary>
         /// <param name="ConnectionToBase"></param>
         public void ChooseConnection(string ConnectionToBase)
         {
+
+
+            DataTable DTable;
             try
             {
-                BaseConn.BuildConnection = new MySqlConnection(ConnectionToBase); 
+                BaseConn.BuildConnection = new MySqlConnection(ConnectionToBase);
                 BaseConn.BuildConnection.Open();
             }
             catch (Exception ex)
@@ -174,6 +313,7 @@ namespace ExamDoc
             }
             try
             {
+                int IdGroup = 0;
                 string Query = "Select idStudentsList, StudentFName, StudentLName, StudentPatronymic, StudentGroupId FROM studentslist"; // запрос на выборку по ФИО
                 string NameStud = Search_Name.Text;
                 string[] a = NameStud.Split(' ');
@@ -187,7 +327,7 @@ namespace ExamDoc
                     object[] O = D.ItemArray;
                     ForSrch.Add(new ForStudSearching()
                     {
-                        idStud =(int)O[0],
+                        idStud = (int)O[0],
                         Fname = (string)O[1],
                         Lname = (string)O[2],
                         Patronymic = (string)O[3],
@@ -195,73 +335,25 @@ namespace ExamDoc
                     }
                     );
                 }
+                NewInsert.StudId = ForSrch[0].idStud;// добавление в структуру на запись в БД
                 DTable.Clear(); //чистка таблицы, на всякий случай.
                 bool flag = true; //флаг для того, чтобы не было повторений вывода сообщений
-                // поиск в листе ФИО по условию
-                foreach (ForStudSearching st in ForSrch) 
-                {           
+                                  // поиск в листе ФИО по условию
+                foreach (ForStudSearching st in ForSrch)
+                {
                     if (st.Fname == a[0] && st.Lname == a[1] && st.Patronymic == a[2]) // ну да, сделал по-колхозному, но тут же лишь ФИО проверяется - незачем тут всякие i-тые элементы делать. Сразу цифрами проще
                     {
                         flag = true; // флагую, чтобы после не шло по if
                         System.Windows.MessageBox.Show("Студент найден");
                         IdStudent = st.idStud;
-                        ForStudFLPNames.Text = NameStud;
+                        ForStudFLPNames.Text = Search_Name.Text;
                         ForSrch.Clear();
-                        string QueryForExamSrch = "Select ExamListsRegistStudid, examlistsregistTypeOfExam FROM examlistsregist"; //строка для запроса на поиск были ли у студента пересдачи
-                        MySqlCommand Finder = new MySqlCommand(QueryForExamSrch, BaseConn.BuildConnection);
-                        MySqlDataReader DataReader = Finder.ExecuteReader();
-                        DTable = new DataTable();
-                        DTable.Load(DataReader);
-                        DataRowCollection ToSrchExams = DTable.Rows;
-                        foreach (DataRow D in ToSrchExams) // добавляю новую позицию в лист
-                        {
-                            object[] O = D.ItemArray;
-                            ExamChecker.Add(new ForExamCheck()
-                            {
-                                idStud = (int)O[0],
-                                idTypeExam = (int)O[1]                             
-                            }
-                            );
-                        }
-                        string q = string.Empty;
-                        int counter = 0; //счетчик для поиска количества вхождения результатов. Необходим если студент в первый раз пересдает и его нет в списках переэкзаменовки
-                        // поиск по реестру экзаменов студента и его пересдачи
-                        foreach (ForExamCheck fec in ExamChecker) 
-                        { 
-                            if (fec.idStud == IdStudent)
-                            {
-                                counter++;
-                                int num = fec.idTypeExam; // определяем тип пересдачи, на основе данных из реестра. Если пересдача была, то выведется следующий тип пересдачи
-                                switch (num)
-                                {
-                                    case 1: // если пересдача 1
-                                        q = "Повторная";
-                                        break;
-                                    case 2: // если пересдач 2
-                                        q = "Комиссионная";
-                                        break;
-                                    case 3: // если пересдач 3
-                                        System.Windows.MessageBox.Show("Такой студент уже пересдавал экзамен три раза. Отказано.");
-                                        FormStackPan.Visibility = Visibility.Collapsed;
-                                         NameStud = string.Empty;
-                                         IdStudent = 0;
-                                        break;
-                                    default:
-                                        q = "Первичная";
-                                        break;
-                                }
-                            }
-                        }
-                        TypeOfExam.Text = q; // если пересдавал, то присваиваем q
-                        if (counter==0)// если нет, то первичную по умолчанию
-                        {
-                            TypeOfExam.Text = "Первичная"; 
-                        }                   
+
                         FormStackPan.Visibility = Visibility.Visible;
                         IdGroup = st.GroupId;
                         break;
                     }
-                    else flag = false;                   
+                    else flag = false;
                 }
                 DTable.Clear();
                 string QueryForGroupDeclare = "SELECT * FROM groupslist";
@@ -281,7 +373,7 @@ namespace ExamDoc
                     }
                     );
                 }
-                foreach (ForGroupDeclaration fgd in ToDeclare)
+                foreach (ForGroupDeclaration fgd in ToDeclare) // печать тэга группы
                 {
                     if (fgd.idGroupList == IdGroup)
                     {
@@ -301,10 +393,10 @@ namespace ExamDoc
                     DisciplinesList.Add(new Disciplines()
                     {
                         DisciplineDescr = (string)O[1],
-                        DisciplineTeacher =(int)O[2]
+                        DisciplineTeacher = (int)O[2]
                     }
-                    ) ;
-                }                
+                    );
+                }
                 if (flag == false) //так избегу повторения вывода messagebox с предупреждением об отсутствии пользователя
                 {
                     System.Windows.MessageBox.Show("Пользователь не найден");
@@ -314,11 +406,12 @@ namespace ExamDoc
             {
                 System.Windows.MessageBox.Show("" + ex);
             }
-            for(int i=0;i+1<=DisciplinesList.Count;i++)
+            for (int i = 0; i + 1 <= DisciplinesList.Count; i++)
             {
                 StudDisciplCb.Items.Add(DisciplinesList[i].DisciplineDescr);
+                StudDisciplCb2.Items.Add(DisciplinesList[i].DisciplineDescr);
+
             }
-            DTable.Clear();
             string QueryTeach = "Select * FROM teacherlist"; // поиск учителей
             MySqlCommand Teach = new MySqlCommand(QueryTeach, BaseConn.BuildConnection);
             MySqlDataReader Data = Teach.ExecuteReader();
@@ -338,86 +431,114 @@ namespace ExamDoc
                 }
                 );
             }
-            for(int i=0; i + 1 <= Teachers.Count; i++)
+            NewInsert.FirstTeacherId = Teachers[0].TeacherId;
+            for (int i = 0; i + 1 <= Teachers.Count; i++) // поиск заведующего отделением
             {
-                if( Teachers[i].TeachersRole == "Заведующий отделением")
+                if (Teachers[i].TeachersRole == "Заведующий отделением")
                 {
                     HeadMasterNameCb.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
                 }
             }
         }
-        /// <summary>
-        /// переадресация на метод ChooseConnection, который найдет имя в БД
-        /// </summary>
-        private void Check_Name_Click(object sender, RoutedEventArgs e)
+
+        private void MethodToFindExamsCounters(int a)
         {
-            ChooseConnection(OpenConnection);
-        }
-        /// <summary>
-        /// Эвент, чтобы открыть календарик
-        /// </summary>
-        private void UnlockCalendar_Click(object sender, RoutedEventArgs e)
-        {
-            DateOfExamCalendar.Visibility = Visibility.Visible;
-            UnlockCalendar.Visibility = Visibility.Collapsed;
-        }
-        /// <summary>
-        /// Эвент, если экзаменаторов больше чем один
-        /// </summary>
-        private void IfCoupleOfExaminators_Checked(object sender, RoutedEventArgs e)
-        {
-            IfExaminatorsMoreThatOne.Visibility = Visibility.Visible;
-            IfExaminatorsMoreThatOne1.Visibility = Visibility.Visible;
-            for (int i = 0; i + 1 <= Teachers.Count; i++)
+            DataTable DTable;
+            string QueryForExamSrch = "Select ExamListsRegistStudid, ExamListsRegistDisciplineid, examlistsregistTypeOfExam FROM examlistsregist"; //строка для запроса на поиск были ли у студента пересдачи
+            MySqlCommand Finder = new MySqlCommand(QueryForExamSrch, BaseConn.BuildConnection);
+            MySqlDataReader DataReader = Finder.ExecuteReader();
+            DTable = new DataTable();
+            DTable.Load(DataReader);
+            DataRowCollection ToSrchExams = DTable.Rows;
+            foreach (DataRow D in ToSrchExams) // добавляю новую позицию в лист
             {
-                if (Teachers[i].TeacherId == TeachId)
+                object[] O = D.ItemArray;
+                ExamChecker.Add(new ForExamCheck()
                 {
-                    //два лица, принимающие экзамен, которые компетентные в сдаваемом предмете
-                    StudExamPersonTb.Items.Clear();
-                    StudExamPersonTb.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
-                    StudExamPersonTb1.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
+                    idStud = (int)O[0],
+                    idFirstDiscipline = (int)O[1],
+                    idTypeExam = (int)O[2]
                 }
-                else
-                {
-                    StudExamPersonTb2.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
-                }
+                );
             }
-        }
-        /// <summary>
-        /// при закрытии комбобокса, при наличии выбранной позиции, будет выполнено действие
-        /// </summary>
-        private void StudDisciplCb_DropDownClosed(object sender, EventArgs e)
-        {
-            string str = StudDisciplCb.SelectedItem.ToString(); // строка с наименованием предмета для отсеивания
-            if (str !=null) //получаем здесь код учителя, для поиска по БД
-            {              
-                for(int i=0;i<DisciplinesList.Count;i++)
+            // поиск по реестру экзаменов студента и его пересдачи
+            foreach (ForExamCheck fec in ExamChecker)
+            {
+                if (fec.idStud == IdStudent) //т.е. в базе пересдач есть студент
                 {
-                    if (DisciplinesList[i].DisciplineDescr == str)
+                    if (a == 1) // т.е. нет второй дисциплины aka только если одна дисциплина
                     {
-                        TeachId = DisciplinesList[i].DisciplineTeacher;
+                        if (StudDisciplCb.SelectedIndex+1 == fec.idFirstDiscipline) //т.е. есть совпадение и по дисциплине
+                        {
+                            int num = fec.idTypeExam;
+                            switch (num)
+                            {
+                                case 1: // если есть одна пересдача
+                                    TypeOfExam.Text = "Повторная";
+                                    CountReexams[0] = 2; //т.к. нужно для будущего внесения данных
+                                    break;
+                                case 2:  // если есть две пересдачи
+                                    TypeOfExam.Text = "Комиссионная";
+                                    CountReexams[0] = 3; //т.к. нужно для будущего внесения данных
+                                    break;
+                                case 3:  // если есть три пересдачи
+                                    System.Windows.MessageBox.Show("Превышен порог пересдач");
+                                    //скрыть все и очистить поле поиска
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }                        
+                    }
+                    else
+                    {
+                        if (StudDisciplCb2.SelectedIndex + 1 == fec.idFirstDiscipline) 
+                        { 
+                            int num = fec.idTypeExam;
+                            
+                                switch (num)
+                                {
+                                    case 1: // если есть одна пересдача
+                                        TypeOfExam2.Text = " + Повторная";
+                                        CountReexams[1] = 2; //т.к. нужно для будущего внесения данных
+                                        break;
+                                    case 2:  // если есть две пересдачи
+                                        TypeOfExam2.Text = " + Комиссионная";
+                                        CountReexams[1] = 3; //т.к. нужно для будущего внесения данных
+
+                                        break;
+                                    case 3:  // если есть три пересдачи
+                                        System.Windows.MessageBox.Show("Превышен порог пересдач");
+                                        //скрыть все и очистить поле поиска
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }                                                                          
+                    }
+                }
+                else // если в базе пересдач нет, то присваивается первичная
+                {
+                    if(StudDisciplCb.SelectedIndex !=-1)
+                    {
+                        TypeOfExam.Text = "Первичная";
+                        CountReexams[0] = 1;
+                    }
+                    if(StudDisciplCb2.SelectedIndex != -1)
+                    {
+                        TypeOfExam2.Text = " + Первичная";
+                        CountReexams[1] = 1;
                     }
                 }
             }
-          
-            if(IfCoupleOfExaminators.IsChecked ==false)
-            {
-                for (int i = 0; i + 1 <= Teachers.Count; i++)
-                {
-                    if(Teachers[i].TeacherId==TeachId)
-                    {
-                        StudExamPersonTb.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
-                    }
-                }
-            }                     
         }
-        /// <summary>
-        /// Получение даты
-        /// </summary>
-        private void DateOfExamCalendar_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
+
+        private void GetLast_Click(object sender, RoutedEventArgs e)
         {
-            DateTime? DT = DateOfExamCalendar.SelectedDate;
-            DateTime Today = DateTime.Today;
+            ForFrames.MyFrames.Navigate(new ShablonLista());
+
         }
     }
 }
+
+

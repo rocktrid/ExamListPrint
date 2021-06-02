@@ -36,12 +36,10 @@ namespace ExamDoc
             public int idExamListsRegist { get; set; }
             public int ExamListsRegistTeacherid { get; set; }
             public int? ExamListsRegistTeacherid2 { get; set; }
-            public int? ExamListsRegistTeacherid3 { get; set; }
+            public int? ExamListsHeadMasterId { get; set; }
             public int ExamListsRegistDisciplineid { get; set; }
-            public int? ExamListsRegistSecondDisciplineid { get; set; }
             public int ExamListsRegistStudid { get; set; }
             public int examlistsregistTypeOfExam { get; set; }
-            public DateTime DateOfExam { get; set; }
             public DateTime DateOfApproving { get; set; }
             public DateTime ExpirationDate { get; set; }
         };
@@ -50,11 +48,11 @@ namespace ExamDoc
         {
             InitializeComponent();
             //подключение к БД
-            String ConnectionToBase = "Database = diplomalocalserver; Data Source = 127.0.0.1; User Id = root; Password = Password";
+            String ConnectionToBase = "Database = diplomalocalserver; Data Source = 127.0.0.1; User Id = root; Password = Password"; //после миграции поменять строку
             BaseConn.BuildConnection = new MySqlConnection(ConnectionToBase);
             BaseConn.BuildConnection.Open();
             //получение данных с последней строки таблицы и помещение её в struct
-            string Query = "SELECT * FROM examlistsregist ORDER BY idExamListsRegist DESC LIMIT 1"; // по идее, должно вывести самую первую позицию снизу aka последняя добавленная запись
+            string Query = "SELECT * FROM examlistsregist ORDER BY idExamListsRegist DESC LIMIT 2"; // по идее, должно вывести самую первую позицию снизу aka последняя добавленная запись
             MySqlCommand Selecter = new MySqlCommand(Query, BaseConn.BuildConnection);
             MySqlDataReader DataReader = Selecter.ExecuteReader();
             DTable = new DataTable();
@@ -71,14 +69,12 @@ namespace ExamDoc
                         idExamListsRegist = (int)O[0],
                         ExamListsRegistTeacherid = (int)O[1],
                         ExamListsRegistTeacherid2 = O[2] == DBNull.Value ? null : (int?)O[2],
-                        ExamListsRegistTeacherid3 = O[3] == DBNull.Value ? null : (int?)O[3],
-                        ExamListsRegistDisciplineid = (int)O[4],
-                        ExamListsRegistSecondDisciplineid = O[5] == DBNull.Value ? null : (int?)O[5],
-                        ExamListsRegistStudid = (int)O[6],
-                        examlistsregistTypeOfExam = (int)O[7],
-                        DateOfExam = (DateTime)O[8],
-                        DateOfApproving = (DateTime)O[9],
-                        ExpirationDate = (DateTime)O[10]
+                        ExamListsRegistDisciplineid = (int)O[3],
+                        ExamListsRegistStudid = (int)O[4],
+                        examlistsregistTypeOfExam = (int)O[5],
+                        DateOfApproving = (DateTime)O[6],
+                        ExpirationDate = (DateTime)O[7],
+                        ExamListsHeadMasterId = (int)O[8]
                     }
                     );
 
@@ -89,18 +85,109 @@ namespace ExamDoc
                 }
             }
             {
+                //
+                if (ExDt[0].ExamListsRegistStudid == ExDt[1].ExamListsRegistStudid && ExDt[0].DateOfApproving == ExDt[1].DateOfApproving) // если если есть две записи подряд по одному студенту (то будет иная форма для печати). Дополнительно проверяю дату аппрува, чтоб наверняка
+                {
+                    // тут будет сцепка первой дисциплины со второй дисциплиной через запятую
+                    Query = "SELECT idDisciplines, DisciplineDescription FROM disciplines";
+                    MySqlCommand DisciplinesSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader DSearch = DisciplinesSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(DSearch);
+                    DataRowCollection DisciplinesFind = DTable.Rows;
+                    foreach (DataRow D in DisciplinesFind)  // первый проход, чтобы найти первую дисциплину
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsRegistDisciplineid)
+                        {
+                            DisciplineData.Text = (string)O[1];
+                        }
+                    }
+                    foreach (DataRow D in DisciplinesFind)  // второй проход, чтобы найти вторую дисциплину
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[1].ExamListsRegistDisciplineid)
+                        {
+                            DisciplineData.Text += ", \r" + (string)O[1];
+                        }
+                    }
+                    // тут будет сцепка первого преподавателя со вторым
+
+                    Query = "SELECT idTeacherList, TeacherListFName, TeacherListLName, TeacherListPatronymicName FROM teacherlist";
+
+                    MySqlCommand TeachersSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader TSearch = TeachersSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(TSearch);
+                    DataRowCollection TeachersFind = DTable.Rows;
+                    foreach (DataRow D in TeachersFind) // первый проход, чтобы найти первого препода
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsRegistTeacherid)
+                        {
+                            TeacherData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                        }
+                    }
+                    foreach (DataRow D in TeachersFind)  // второй проход, чтобы найти второго препода
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[1].ExamListsRegistTeacherid)
+                        {
+                            TeacherData.Text += ", \r"+ (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                        }
+                    }
+                }
+
+                else
+                {
+                    // тут просто первая дисциплина
+                    Query = "SELECT idDisciplines, DisciplineDescription FROM disciplines";
+                    MySqlCommand DisciplinesSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader DSearch = DisciplinesSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(DSearch);
+                    DataRowCollection DisciplinesFind = DTable.Rows;
+                    foreach (DataRow D in DisciplinesFind)  // первый проход, чтобы найти первую дисциплину
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsRegistDisciplineid)
+                        {
+                            DisciplineData.Text = (string)O[1];
+                        }
+                    }
+                    // а тут просто первый преподаватель
+                    Query = "SELECT idTeacherList, TeacherListFName, TeacherListLName, TeacherListPatronymicName FROM teacherlist";
+
+                    MySqlCommand TeachersSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader TSearch = TeachersSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(TSearch);
+                    DataRowCollection TeachersFind = DTable.Rows;
+                    foreach (DataRow D in TeachersFind) // первый проход, чтобы найти первого препода
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsRegistTeacherid)
+                        {
+                            TeacherData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                        }
+                    }
+                    foreach (DataRow D in TeachersFind)  // второй проход, чтобы найти второго препода
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[1].ExamListsRegistTeacherid)
+                        {
+                            TeacherData.Text += ", \r" + (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                        }
+                    }
+                }
+                //
+                
                 ForIdExam.Text = ExDt[0].idExamListsRegist.ToString();
-                DateOfExamData.Text = ExDt[0].DateOfExam.ToString("d/MM/yyy");
+                //DateOfExamData.Text = ExDt[0].DateOfExam.ToString("d/MM/yyy");//
                 DateOfAquiring.Text = ExDt[0].DateOfApproving.ToString("d/MM/yyy");
                 DateOfExpirationData.Text = ExDt[0].ExpirationDate.ToString("d/MM/yyy");
-
-
             }
-            // однако, это лишь добавит idшники из таблицы. Надо перевести их в данные
-            // ну че, брутфорс. На каждый id надо сделать запрос на выборку и замену на string
-            string Query1 = "SELECT * FROM "; 
         }
-
         // Конверт из wpf В xps
         private void Print_Click(object sender, RoutedEventArgs e)
         {
