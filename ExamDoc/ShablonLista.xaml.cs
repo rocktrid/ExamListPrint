@@ -299,70 +299,105 @@ namespace ExamDoc
                 System.Windows.MessageBox.Show("" + ex);
             }
             }
-        
-        // Конверт из wpf В xps
+
+        // Конверт из wpf В xps данный метод с конвертации я заменю сразу на печать документа
         private void Print_Click(object sender, RoutedEventArgs e)
         {
-            Print.Visibility = Visibility.Collapsed;
-            GoBack.Visibility = Visibility.Collapsed;
-            MemoryStream lMemoryStream = new MemoryStream(); // поток для чтения wpf
-            Package package = Package.Open(lMemoryStream, FileMode.Create); //забиваем wpf в контейнер
-            XpsDocument doc = new XpsDocument(package); //представление wpf в xps документ
-            XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc); // запись wpf в xps
-            writer.Write(this); //записывает текущее окно в xps
-            doc.Close(); //закрывает представление
-            package.Close(); //закрывает контейнер
-            // Конвертируем xps в pdf
-            MemoryStream outStream = new MemoryStream(); //поток для pdf
-            PdfSharp.Xps.XpsConverter.Convert(lMemoryStream, outStream, false); //конвертация потока xps в поток pdf с закрытием потока pdf после 
-            // Запись в pdf
             string CheckName = "";
             string StudName = string.Empty;
             string savepath = string.Empty;
-            SaveFileDialog SaveFile = new SaveFileDialog
-            {
-                Filter = "PDF (*.pdf)|*.pdf",
-                FileName = "Допуск на пересдачу" + StudName + ".pdf"
-            };
-            if (SaveFile.ShowDialog() == DialogResult.OK)
-            {
-                savepath = System.IO.Path.GetFullPath(SaveFile.FileName);
-                System.Windows.MessageBox.Show("Данные экспортируются в документ");
-                if (File.Exists(CheckName))
-                {
-                    try
-                    {
-                        File.Delete(CheckName);
+            string path;
+            Print.Visibility = Visibility.Collapsed;
+            GoBack.Visibility = Visibility.Collapsed;
+            System.Windows.Controls.PrintDialog pDialog = new System.Windows.Controls.PrintDialog();
+            pDialog.PageRangeSelection = PageRangeSelection.CurrentPage;
+            pDialog.UserPageRangeEnabled = true;
+            var dlg = new System.Windows.Controls.PrintDialog();
+            dlg.PageRangeSelection = PageRangeSelection.CurrentPage;
+            dlg.PrintQueue = new PrintQueue(new PrintServer(), "Здесь имя принтера");
+            dlg.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
+            dlg.PrintTicket.PagesPerSheet = 2;
 
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Windows.MessageBox.Show("Ошибка: " + ex.Message);
-                    }
-                }
-                if (savepath != null)
+
+            bool? print = pDialog.ShowDialog();
+            if (print == true)
+            {
+                SaveFileDialog SaveFile = new SaveFileDialog
                 {
-                    FileStream fileStream = new FileStream(savepath, FileMode.Create); //поток для записи документа
-                    outStream.CopyTo(fileStream); //поток pdf копируется по месту filestream
-                    System.Windows.MessageBox.Show("Документ создан");
-                    // Очистка потока outstream
-                    outStream.Flush(); //чистит буфер потока
-                    outStream.Close(); //закрывает буфер потока
-                    fileStream.Flush(); //чистит буфер потока
-                    fileStream.Close(); //закрывает буфер потока
+                    Filter = "XPS (*.xps)|*.xps",
+                    FileName = "Допуск на пересдачу" + StudName + ".xps"
+                };
+                if (SaveFile.ShowDialog() == DialogResult.OK)
+                {
+                    savepath = System.IO.Path.GetFullPath(SaveFile.FileName);
+                    path = SaveFile.FileName;
+                    System.Windows.MessageBox.Show("Данные экспортируются в документ");
+                    if (File.Exists(CheckName))
+                    {
+                        try
+                        {
+                            File.Delete(CheckName);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Windows.MessageBox.Show("Ошибка: " + ex.Message);
+                        }
+                    }                   
                 }
+
             }
 
-            else
-            {
-                System.Windows.MessageBox.Show("путь не выбран, повторите снова");
-            }
-            GoBack.Visibility = Visibility.Visible;
+
+            //// Конвертируем xps в pdf
+            //MemoryStream outStream = new MemoryStream(); //поток для pdf
+            //PdfSharp.Xps.XpsConverter.Convert(lMemoryStream, outStream, false); //конвертация потока xps в поток pdf с закрытием потока pdf после 
+            //// Запись в pdf
+
+            //SaveFileDialog SaveFile = new SaveFileDialog
+            //{
+            //    Filter = "PDF (*.pdf)|*.pdf",
+            //    FileName = "Допуск на пересдачу" + StudName + ".pdf"
+            //};
+            //if (SaveFile.ShowDialog() == DialogResult.OK)
+            //{
+            //    savepath = System.IO.Path.GetFullPath(SaveFile.FileName);
+            //    System.Windows.MessageBox.Show("Данные экспортируются в документ");
+            //    if (File.Exists(CheckName))
+            //    {
+            //        try
+            //        {
+            //            File.Delete(CheckName);
+
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            System.Windows.MessageBox.Show("Ошибка: " + ex.Message);
+            //        }
+            //    }
+            //    if (savepath != null)
+            //    {
+            //        FileStream fileStream = new FileStream(savepath, FileMode.Create); //поток для записи документа
+            //        outStream.CopyTo(fileStream); //поток pdf копируется по месту filestream
+            //        System.Windows.MessageBox.Show("Документ создан");
+            //        // Очистка потока outstream
+            //        outStream.Flush(); //чистит буфер потока
+            //        outStream.Close(); //закрывает буфер потока
+            //        fileStream.Flush(); //чистит буфер потока
+            //        fileStream.Close(); //закрывает буфер потока
+            //    }
+            //}
+
+            //else
+            //{
+            //    System.Windows.MessageBox.Show("путь не выбран, повторите снова");
+            //}
+            //GoBack.Visibility = Visibility.Visible;
 
         }
 
         private void GoBack_Click(object sender, RoutedEventArgs e)
         {
+
             ForFrames.MyFrames.GoBack();
 
         }

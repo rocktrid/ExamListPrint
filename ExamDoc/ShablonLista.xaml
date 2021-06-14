@@ -8,7 +8,7 @@
       d:DesignHeight="650" d:DesignWidth="550"
       Title="ShablonLista">
 
-    <Grid Background="White">
+    <Grid Background="White" Name="ShablonGrid">
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Vertical">
                 <TextBlock Padding="20"/>
