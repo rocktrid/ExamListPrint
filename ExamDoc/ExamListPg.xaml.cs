@@ -209,6 +209,7 @@ namespace ExamDoc
             }
             if (StudDisciplCb.SelectedIndex != -1)
             {
+                StudExamPersonTb1.Items.Clear();
                 HeadMasterNameCb.Visibility = Visibility.Visible;
                 StudExamPersonTb.Visibility = Visibility.Visible;
                 Examinator1Tb.Visibility = Visibility.Visible;
@@ -244,7 +245,10 @@ namespace ExamDoc
                     {
                         StudExamPersonTb.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
                     }
+                    else
+                    StudExamPersonTb1.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
                 }
+               
             }
 
         }
@@ -259,17 +263,6 @@ namespace ExamDoc
             // далее добавить это в структуру
         }
 
-
-        private void IfCoupleTeachers_Checked(object sender, RoutedEventArgs e)
-        {
-            IfExaminatorsMoreThatOne.Visibility = Visibility.Visible;
-
-        }
-        private void IfCoupleTeachers_Unchecked(object sender, RoutedEventArgs e)
-        {
-            IfExaminatorsMoreThatOne.Visibility = Visibility.Collapsed;
-            StudExamPersonTb1.Items.Clear();
-        }
         ///
         ///<summary>метод осуществляющий экзекут sql команды</summary>
         ///
@@ -280,16 +273,25 @@ namespace ExamDoc
                 
                 if (IfSpecExam.IsChecked == true && DiscTypeCb.SelectedIndex !=-1) // если специальный экзамен, тогда в таблицу добавляется экзамен с поправкой на вид дисциплины
                 {
-                    MySqlCommand InsertCommand = new MySqlCommand("INSERT INTO examlistsregist (ExamListsRegistTeacherid, ExamListsTypeOfDisciplineId, ExamListsSpecialDisciplineId," +
-                    " ExamListsRegistStudid, examlistsregistTypeOfExam, DateOfApproving, ExpirationDate, ExamListsHeadMasterId) VALUES(@ExamListsRegistTeacherid, @ExamListsTypeOfDisciplineId," +
-                    " @ExamListsSpecialDisciplineId , @ExamListsRegistStudid, @examlistsregistTypeOfExam, @DateOfApproving, @ExpirationDate, @ExamListsHeadMasterId)", BaseConn.BuildConnection);
+                    
+                    MySqlCommand InsertCommand = new MySqlCommand("INSERT INTO examlistsregist (ExamListsRegistTeacherid, ExamListsRegistTeacherid2, ExamListsModuleId, ExamListsSpecialDisciplineId," +
+                    " ExamListsSecondSpecialDisciplineId, ExamListsRegistStudid, examlistsregistTypeOfExam, DateOfApproving, ExpirationDate, ExamListsHeadMasterId)" +
+                    " VALUES(@ExamListsRegistTeacherid, @ExamListsRegistTeacherid2, @ExamListsModuleId," +
+                    " @ExamListsSpecialDisciplineId , @ExamListsSecondSpecialDisciplineId, @ExamListsRegistStudid, @examlistsregistTypeOfExam," +
+                    " @DateOfApproving, @ExpirationDate, @ExamListsHeadMasterId)", BaseConn.BuildConnection);
                     InsertCommand.CommandType = CommandType.Text;
                     InsertCommand.Parameters.AddWithValue("@ExamListsRegistStudid", NewInsert.StudId); //ид студента
                     InsertCommand.Parameters.AddWithValue("@examlistsregistTypeOfExam", CountReexams[0]); // ид типа пересдачи
                     InsertCommand.Parameters.AddWithValue("@DateOfApproving", c); //дата выдачи
                     InsertCommand.Parameters.AddWithValue("@ExpirationDate", b); // последняя дата
-                    InsertCommand.Parameters.AddWithValue("@ExamListsTypeOfDisciplineId", DiscTypeCb.SelectedIndex + 1); //ид типа спец экзамена
-                    InsertCommand.Parameters.AddWithValue("@ExamListsSpecialDisciplineId", StudDisciplCb.SelectedIndex + 1); // ид для спец типа экзамена
+                    InsertCommand.Parameters.AddWithValue("@ExamListsModuleId", StudDisciplCb.SelectedIndex + 1); //ид модуля для спец
+                    InsertCommand.Parameters.AddWithValue("@ExamListsSpecialDisciplineId", DiscTypeCb.SelectedIndex + 1); // ид УП ПП ...
+                    if (CheckForSecondDiscipline.IsChecked == true) // при наличии второго особого "экзамена"
+                    {
+                        InsertCommand.Parameters.AddWithValue("@ExamListsSecondSpecialDisciplineId", DiscTypeCb2.SelectedIndex + 1); // ид УП ПП ...
+                    }
+                    else
+                        InsertCommand.Parameters.AddWithValue("@ExamListsSecondSpecialDisciplineId", null); // ид УП ПП ...
 
                     for (int i = 0; i < Teachers.Count; i++)
                     {
@@ -297,6 +299,11 @@ namespace ExamDoc
                         if ((string)StudExamPersonTb.SelectedItem == str)
                         {
                             InsertCommand.Parameters.AddWithValue("@ExamListsRegistTeacherid", Teachers[i].TeacherId); // ид учителя
+                        }
+                        if ((string)StudExamPersonTb1.SelectedItem == str)
+                        {
+                            InsertCommand.Parameters.AddWithValue("@ExamListsRegistTeacherid2", Teachers[i].TeacherId); // ид учителя
+
                         }
                     }
                     for (int i = 0; i < Teachers.Count; i++)
@@ -318,7 +325,7 @@ namespace ExamDoc
                 {
                     System.Windows.MessageBox.Show("Не стоит галочка для Особый экзамен");
                 }
-                else // если один преподаватель
+                else // если экзамен не специальный
                 {
                     MySqlCommand InsertCommand = new MySqlCommand("INSERT INTO examlistsregist (ExamListsRegistTeacherid, ExamListsRegistDisciplineid," +
                         " ExamListsRegistStudid, examlistsregistTypeOfExam, DateOfApproving, ExpirationDate, ExamListsHeadMasterId)" +
@@ -376,7 +383,12 @@ namespace ExamDoc
             //}
             //
             ExecSqlComm(DT, Today);
+            if(IfSpecExam.IsChecked == true)
+            {
+                ForFrames.MyFrames.Navigate(new ShablonLista());
 
+            }
+            else
             ForFrames.MyFrames.Navigate(new ShablonLista());
         }
         /// <summary>
@@ -610,6 +622,7 @@ namespace ExamDoc
         /// <param name="e"></param>
         private void IfSpecExam_Checked(object sender, RoutedEventArgs e)
         {
+            IfExaminatorsMoreThatOne.Visibility = Visibility.Visible;
             DataTable DTable;
             string QueryForDiscSearch = "Select * FROM disciplinestypes"; //строка для запроса на поиск типа дисциплины
             MySqlCommand Finder = new MySqlCommand(QueryForDiscSearch, BaseConn.BuildConnection);
@@ -632,12 +645,11 @@ namespace ExamDoc
                 foreach (var str in DiscT)
                 {
                     DiscTypeCb.Items.Add(str.disctypedescr);
+                    DiscTypeCb2.Items.Add(str.disctypedescr);
                 }
-            }
-        
-    
+            }       
             ForSpecialDisciplines.Visibility = Visibility.Visible;
-           
+            
         }
 
         private void IfSpecExam_Unchecked(object sender, RoutedEventArgs e)
@@ -648,12 +660,15 @@ namespace ExamDoc
             {
                 StudDisciplCb.Items.Add(str.DisciplineDescr);
             }
+            IfExaminatorsMoreThatOne.Visibility = Visibility.Collapsed;
+            StudExamPersonTb1.Items.Clear();
         }
 
         private void DiscTypeCb_DropDownClosed(object sender, EventArgs e)
         {
             if (DiscTypeCb.SelectedIndex != -1)
             {
+                Modules.Clear();
                 DataTable DTable;
                 string QueryForDisc = "Select * FROM modules"; //строка для запроса на поиск ПМ
                 MySqlCommand Finder = new MySqlCommand(QueryForDisc, BaseConn.BuildConnection);
@@ -677,6 +692,21 @@ namespace ExamDoc
                 {
                     StudDisciplCb.Items.Add(str.moduledescr);
                 }
+            }
+        }
+
+        private void CheckForSecondDiscipline_Checked(object sender, RoutedEventArgs e)
+        {
+            ForSecondSpecialDiscipline.Visibility = Visibility.Visible;
+        }
+
+        private void DiscTypeCb2_DropDownOpened(object sender, EventArgs e)
+        {
+            // здесь вызвать обработчик предыдущего события IfSpecExam_Checked, чтобы снова добавить в комбобокс данные, т.к. они будут, в последствии, удаляться
+            if (DiscTypeCb.SelectedIndex != -1)
+            {
+                string str = DiscTypeCb.SelectedItem.ToString();
+                DiscTypeCb2.Items.Remove(str); // как  тебе такое, Илон Маск?
             }
         }
     }

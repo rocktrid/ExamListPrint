@@ -33,20 +33,27 @@
                     <TextBox Name="ForStudFLPNames" Width="300"  BorderThickness="0"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Name="ForSpecialDisciplines" Visibility="Collapsed">
-                    <TextBlock Text="Вид" Margin="0,0,105,0" Padding="5"/>
-                    <ComboBox Name="DiscTypeCb" Width="200" Margin="48,0,0,0" DropDownClosed="DiscTypeCb_DropDownClosed"/>
+                    <TextBlock Text="Первый вид" Margin="0,0,105,0" Padding="5"/>
+                    <ComboBox Name="DiscTypeCb" Width="200" Margin="1,0,0,0" DropDownClosed="DiscTypeCb_DropDownClosed"/>
                 </StackPanel>
+                <StackPanel Orientation="Horizontal" Name="ForSecondSpecialDiscipline" Visibility="Collapsed">
+                    <TextBlock Text="Второй вид" Margin="0,0,105,0" Padding="5"/>
+                    <ComboBox Name="DiscTypeCb2" Width="200" Margin="5,0,0,0" DropDownOpened="DiscTypeCb2_DropDownOpened"/>
+                </StackPanel>
+
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Дисциплина" Margin="0,0,105,0" Padding="5"/>
                     <ComboBox Name="StudDisciplCb" Width="200" DropDownClosed="StudDisciplCb_DropDownClosed" />
                     <TextBlock Text="Особый экзамен" Padding="5"/>
-                    <CheckBox Name="IfSpecExam"  Margin="10,0,0,0" Padding="5" VerticalAlignment="center" Checked="IfSpecExam_Checked" Unchecked="IfSpecExam_Unchecked"/>
+                    <TextBlock Margin="61,0,0,0" />
+                    <CheckBox Name="IfSpecExam"  Margin="10,0,0,0" Padding="5" VerticalAlignment="Center" HorizontalAlignment="right" Checked="IfSpecExam_Checked" Unchecked="IfSpecExam_Unchecked"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Name="Examinator1Tb" Text="Экзаменатор" Margin="0,0,93,0" Padding="5" Visibility="Visible"/> 
                     <ComboBox Name ="StudExamPersonTb" Width="200" Margin="8,0,0,0" Visibility="Visible"/>
-                    <TextBlock Text="Несколько преподавателей" Padding="5"/>
-                    <CheckBox Name="IfCoupleTeachers" Margin="10,0,0,0" Padding="5" VerticalAlignment="center" Checked="IfCoupleTeachers_Checked" Unchecked="IfCoupleTeachers_Unchecked" />
+                    <TextBlock Text="Дополнительная пересдача" Padding="5"/>
+                    <CheckBox x:Name="CheckForSecondDiscipline" Margin="10,0,0,0" Padding="5" VerticalAlignment="center" Checked="CheckForSecondDiscipline_Checked"  />
+
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Name="IfExaminatorsMoreThatOne" Visibility="Collapsed">
                     <TextBlock Name="Examinator2Tb" Text="Экзаменатор 2" Margin="0,0,93,0" Padding="5"/>
@@ -63,11 +70,19 @@
                     <Button Name="UnlockCalendar" Content="Выбрать дату"  Width="100" Click="UnlockCalendar_Click"/>
                     <Calendar Name="DateOfExamCalendar"  Visibility="Collapsed" SelectedDatesChanged="DateOfExamCalendar_SelectedDatesChanged"/>
                 </StackPanel>
-                <StackPanel>
-                    <Button x:Name="ToPrint" Width="100" Height="50" Content="Занести в базу" Padding="5" Click="ToPrint_Click" Margin="450,0,0,0" VerticalAlignment="Bottom" Visibility="Visible"/>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical">
+                        <Button x:Name="GetLast" Height="50" Content="Просмотр последнего" Width="150" Padding ="5" Click="GetLast_Click" Margin="10,20,0,0" VerticalAlignment="Bottom" HorizontalAlignment="Left" Visibility="Visible"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Width="310"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                        <Button x:Name="ToPrint" Width="100" Height="50" Content="Занести в базу" Padding="5" Click="ToPrint_Click" Margin="0,0,0,0" VerticalAlignment="Center" Visibility="Visible"/>
+                    </StackPanel>
+
                 </StackPanel>
                 <StackPanel>
-                <Button x:Name="GetLast" Height="50" Content="Просмотр последнего" Width="Auto" Padding ="5" Click="GetLast_Click" Margin="450,20,0,0" VerticalAlignment="Bottom" Visibility="Visible"/>
             </StackPanel>
         </StackPanel>
         </StackPanel>
