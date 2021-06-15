@@ -23,7 +23,7 @@
                 <TextBlock Name="Lab5" Text="Очное отделение" FontFamily="Times New Roman" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
                 <TextBlock Name="TypeOfExam" Text="Пересдача" HorizontalAlignment="Right" Margin="0,0,40,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Name="TypeOfExamData1" Text="text" HorizontalAlignment="Center" Margin="0,0,75,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
+                    <TextBlock Name="TypeOfExamData1" Width="Auto" Text="text" Margin="0,0,38,0" Padding="5" FontFamily="Times New Roman" FontSize="14"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Visibility="Collapsed" Name="ForSecondDiscType">
                     <TextBlock Name="ExamDiscipline2" Text="Дисциплина 2" HorizontalAlignment="Right" Padding="5" FontFamily="Times New Roman" FontSize="14"/>

@@ -77,7 +77,7 @@ namespace ExamDoc
                         ExamListsSpecialDisciplineId = O[3] == DBNull.Value ? null : (int?)O[3],
                         ExamListsSecondSpecialDisciplineId = O[4] == DBNull.Value ? null : (int?)O[4],
                         ExamListsModuleId = O[5] == DBNull.Value ? null : (int?)O[5],
-                        ExamListsRegistDisciplineid = O[6] == DBNull.Value ? null : (int?)O[5],
+                        ExamListsRegistDisciplineid = O[6] == DBNull.Value ? null : (int?)O[6],
                         ExamListsRegistStudid = (int)O[7],
                         examlistsregistTypeOfExam = (int)O[8],
                         DateOfApproving = (DateTime)O[9],
@@ -91,7 +91,6 @@ namespace ExamDoc
                     System.Windows.MessageBox.Show("Ошибка " + ex);
                 }
             }
-
             try
             {
                 if(ExDt[0].ExamListsSecondSpecialDisciplineId != null) //присутствует два модуля
@@ -111,14 +110,11 @@ namespace ExamDoc
                         if ((int)O[0] == ExDt[0].ExamListsSecondSpecialDisciplineId)
                         {
                             DisciplineData.Text += " " + (string)O[1] + ",";
-
                         }
                         if ((int)O[0] == ExDt[0].ExamListsSpecialDisciplineId)
                         {
                             DisciplineData.Text += " " + (string)O[1] + ",";
-
-                        }
-                        
+                        }                       
                     }
                     DSearch.Close();
                     DTable.Clear();
@@ -180,9 +176,7 @@ namespace ExamDoc
                                 TeacherData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
                             }
                         }
-                    }
-                   
-
+                    }                  
                     Query = "SELECT * FROM teacherlist";
                     MySqlCommand HeadMasterSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
                     MySqlDataReader HeadSearch = HeadMasterSearch.ExecuteReader();
@@ -243,7 +237,96 @@ namespace ExamDoc
                         }
                     }
                 }
-                    
+                else
+                {
+                    Query = "SELECT idDisciplines, DisciplineDescription FROM disciplines";
+                    MySqlCommand DiscSearching = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader DSearch = DiscSearching.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(DSearch);
+                    DataRowCollection DisciplineFind = DTable.Rows;
+                    foreach (DataRow D in DisciplineFind) // первый проход, чтобы найти первого препода
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsRegistDisciplineid)
+                        {
+                            DisciplineData.Text = (string)O[1];
+                        }
+                    }
+                    Query = "SELECT idTeacherList, TeacherListFName, TeacherListLName, TeacherListPatronymicName FROM teacherlist";
+                    MySqlCommand TeachersSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader TSearch = TeachersSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(TSearch);
+                    DataRowCollection TeachersFind = DTable.Rows;
+                    foreach (DataRow D in TeachersFind) // первый проход, чтобы найти первого препода
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsRegistTeacherid)
+                        {
+                            TeacherData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                        }
+                    }
+                    Query = "SELECT * FROM teacherlist";
+                    MySqlCommand HeadMasterSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader HeadSearch = HeadMasterSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(HeadSearch);
+                    DataRowCollection HeadMFind = DTable.Rows;
+                    foreach (DataRow D in HeadMFind) // первый проход, чтобы найти первого препода
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsHeadMasterId)
+                        {
+                            ExamHead.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
+                        }
+                    }
+                    Query = "SELECT * FROM studentslist";
+                    MySqlCommand StudSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader Stud = StudSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(Stud);
+                    DataRowCollection StudFind = DTable.Rows;
+                    Query = "SELECT * FROM groupslist";
+                    MySqlCommand GroupSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader Group = GroupSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(Group);
+                    DataRowCollection GroupFind = DTable.Rows;
+                    Query = "SELECT * FROM examtypes";
+                    MySqlCommand ExamTypeSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
+                    MySqlDataReader ExamType = ExamTypeSearch.ExecuteReader();
+                    DTable = new DataTable();
+                    DTable.Load(ExamType);
+                    DataRowCollection ExamTypeFind = DTable.Rows;
+                    foreach (DataRow D in StudFind) // первый проход, чтобы найти первого препода
+                    {
+                        object[] O = D.ItemArray;
+                        if ((int)O[0] == ExDt[0].ExamListsRegistStudid)
+                        {
+                            DateOfAquiring.Text = ExDt[0].DateOfApproving.ToString("d/MM/yyy");
+                            DateOfExpirationData.Text = ExDt[0].ExpirationDate.ToString("d/MM/yyy");
+                            ForIdExam.Text = ExDt[0].idExamListsRegist.ToString();
+                            StudFLPNameData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3]; //нашли студика
+                            foreach (DataRow S in GroupFind) // здесь же найдем и его группу
+                            {
+                                object[] P = S.ItemArray;
+                                if ((int)P[0] == (int)O[5])
+                                {
+                                    GroupData.Text = (string)P[1];
+                                }
+                            }
+                            foreach (DataRow V in ExamTypeFind)
+                            {
+                                object[] Q = V.ItemArray;
+                                if (ExDt[0].examlistsregistTypeOfExam == (int)V[0])
+                                {
+                                    TypeOfExamData1.Text = (string)V[1];
+                                }
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -254,7 +337,15 @@ namespace ExamDoc
         // Конверт из wpf В xps данный метод с конвертации я заменю сразу на печать документа
         private void Print_Click(object sender, RoutedEventArgs e)
         {
-            
+            System.Windows.Controls.PrintDialog printDialog = new System.Windows.Controls.PrintDialog();
+            if (printDialog.ShowDialog() == true)
+            {
+                MemoryStream lMemoryStream = new MemoryStream(); // поток для чтения wpf
+                Package package = Package.Open(lMemoryStream, FileMode.Create); //забиваем wpf в контейнер
+                XpsDocument doc = new XpsDocument(package); //представление wpf в xps документ
+                XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc); // запись wpf в xps
+                writer.Write(this);
+            }
         }
 
         private void GoBack_Click(object sender, RoutedEventArgs e)
@@ -267,27 +358,32 @@ namespace ExamDoc
         private void SaveToPDF_Click(object sender, RoutedEventArgs e) // сохранение с конвертацией в pdf
         {
             string savepath;
+            SaveToPDF.Visibility = Visibility.Collapsed;
+            Print.Visibility = Visibility.Collapsed;
+            GoBack.Visibility = Visibility.Collapsed;
             string StudName = StudFLPNameData.Text;
-            string CheckName;
-            MemoryStream lMemoryStream = new MemoryStream();
-            // Конвертируем xps в pdf
-            MemoryStream outStream = new MemoryStream(); //поток для pdf
-            PdfSharp.Xps.XpsConverter.Convert(lMemoryStream, outStream, false); //конвертация потока xps в поток pdf с закрытием потока pdf после 
+            MemoryStream lMemoryStream = new MemoryStream(); // поток для чтения wpf
+            Package package = Package.Open(lMemoryStream, FileMode.Create); //забиваем wpf в контейнер
+            XpsDocument doc = new XpsDocument(package); //представление wpf в xps документ
+            XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc); // запись wpf в xps
+            writer.Write(this); //записывает текущее окно в xps
+            doc.Close(); //закрывает представление
+            package.Close(); //закрывает контейнер
             // Запись в pdf
             SaveFileDialog SaveFile = new SaveFileDialog
             {
                 Filter = "PDF (*.pdf)|*.pdf",
-                FileName = "Допуск на пересдачу" + StudName + ".pdf"
+                FileName = "Допуск на пересдачу" +" "+ StudName + ".pdf"
             };
             if (SaveFile.ShowDialog() == DialogResult.OK)
             {
                 savepath = System.IO.Path.GetFullPath(SaveFile.FileName);
                 System.Windows.MessageBox.Show("Данные экспортируются в документ");
-                if (File.Exists(CheckName))
+                if (File.Exists(savepath))
                 {
                     try
                     {
-                        File.Delete(CheckName);
+                        File.Delete(savepath);
 
                     }
                     catch (Exception ex)
@@ -297,6 +393,9 @@ namespace ExamDoc
                 }
                 if (savepath != null)
                 {
+                    // Конвертируем xps в pdf
+                    MemoryStream outStream = new MemoryStream(); //поток для pdf
+                    PdfSharp.Xps.XpsConverter.Convert(lMemoryStream, outStream, false); //конвертация потока xps в поток pdf с закрытием потока pdf после 
                     FileStream fileStream = new FileStream(savepath, FileMode.Create); //поток для записи документа
                     outStream.CopyTo(fileStream); //поток pdf копируется по месту filestream
                     System.Windows.MessageBox.Show("Документ создан");
@@ -306,12 +405,16 @@ namespace ExamDoc
                     fileStream.Flush(); //чистит буфер потока
                     fileStream.Close(); //закрывает буфер потока
                 }
+
             }
 
             else
             {
                 System.Windows.MessageBox.Show("путь не выбран, повторите снова");
             }
+            SaveToPDF.Visibility = Visibility.Visible;
+            Print.Visibility = Visibility.Visible;
+            GoBack.Visibility = Visibility.Visible;
         }
     }
 }
