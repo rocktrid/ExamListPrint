@@ -22,7 +22,7 @@ using System.Windows.Xps;
 using System.Windows.Xps.Packaging;
 using MySql.Data.MySqlClient;
 using System.Data;
-
+using System.Drawing.Printing;
 namespace ExamDoc
 {
     /// <summary>
@@ -49,6 +49,7 @@ namespace ExamDoc
             public DateTime ExpirationDate { get; set; }
         };
         List<ExamData> ExDt = new List<ExamData>();
+
         public ShablonLista()
         {
             InitializeComponent();
@@ -337,14 +338,34 @@ namespace ExamDoc
         // Конверт из wpf В xps данный метод с конвертации я заменю сразу на печать документа
         private void Print_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Controls.PrintDialog printDialog = new System.Windows.Controls.PrintDialog();
-            if (printDialog.ShowDialog() == true)
+            int pagenumber; // для печати нескольких страниц на один документ
+            string name = "Табаков допуск";
+            // Send to the printer.
+            SaveToPDF.Visibility = Visibility.Collapsed;
+            Print.Visibility = Visibility.Collapsed;
+            GoBack.Visibility = Visibility.Collapsed;
+            Prnt(ShablonGrid, name);
+
+            //System.Windows.Controls.PrintDialog printDialog = new System.Windows.Controls.PrintDialog();
+            //printDialog.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
+            //printDialog.PrintVisual(ShablonGrid, "My First Print Job");
+            SaveToPDF.Visibility = Visibility.Visible;
+            Print.Visibility = Visibility.Visible;
+            GoBack.Visibility = Visibility.Visible;
+        }
+        public static void Prnt(Visual elementToPrint, string description)
+        {
+            using (var printServer = new LocalPrintServer())
             {
-                MemoryStream lMemoryStream = new MemoryStream(); // поток для чтения wpf
-                Package package = Package.Open(lMemoryStream, FileMode.Create); //забиваем wpf в контейнер
-                XpsDocument doc = new XpsDocument(package); //представление wpf в xps документ
-                XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(doc); // запись wpf в xps
-                writer.Write(this);
+                var dialog = new System.Windows.Controls.PrintDialog();
+                //Find the PDF printer
+                var qs = printServer.GetPrintQueues();
+                var queue = qs.FirstOrDefault(q => q.Name.Contains("PDF"));
+                if (queue == null) {/*handle what you want to do here (possibly use XPS?)*/}
+                dialog.PrintTicket.PageOrientation = System.Printing.PageOrientation.Landscape;
+                dialog.PrintTicket.CopyCount = 2;
+                dialog.PrintQueue = queue;
+                dialog.PrintVisual(elementToPrint, description);
             }
         }
 
@@ -357,7 +378,6 @@ namespace ExamDoc
 
         private void SaveToPDF_Click(object sender, RoutedEventArgs e) // сохранение с конвертацией в pdf
         {
-            string savepath;
             SaveToPDF.Visibility = Visibility.Collapsed;
             Print.Visibility = Visibility.Collapsed;
             GoBack.Visibility = Visibility.Collapsed;
@@ -377,6 +397,7 @@ namespace ExamDoc
             };
             if (SaveFile.ShowDialog() == DialogResult.OK)
             {
+                string savepath;
                 savepath = System.IO.Path.GetFullPath(SaveFile.FileName);
                 System.Windows.MessageBox.Show("Данные экспортируются в документ");
                 if (File.Exists(savepath))
@@ -416,5 +437,6 @@ namespace ExamDoc
             Print.Visibility = Visibility.Visible;
             GoBack.Visibility = Visibility.Visible;
         }
+
     }
 }
