@@ -181,9 +181,9 @@ namespace ExamDoc
         private void Check_Name_Click(object sender, RoutedEventArgs e)
         {
             FormStackPan.Visibility = Visibility.Visible;
-            foreach(var str in ForSrch)
+            foreach (var str in ForSrch)
             {
-                if (str.Fname+" "+str.Lname+" "+str.Patronymic == Search_Name.Text)
+                if (str.Fname + " " + str.Lname + " " + str.Patronymic == Search_Name.Text)
                 {
                     NewInsert.StudId = str.idStud;
                     JumpToNextStep();
@@ -246,9 +246,9 @@ namespace ExamDoc
                         StudExamPersonTb.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
                     }
                     else
-                    StudExamPersonTb1.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
+                        StudExamPersonTb1.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
                 }
-               
+
             }
 
         }
@@ -259,21 +259,19 @@ namespace ExamDoc
         {
             NewInsert.DateOfApproving = DateTime.Today;
             NewInsert.DateOfExpiration = (DateTime)DateOfExamCalendar.SelectedDate;
-
-            // далее добавить это в структуру
         }
 
         ///
         ///<summary>метод осуществляющий экзекут sql команды</summary>
         ///
-        private void ExecSqlComm( DateTime? b, DateTime c)
+        private void ExecSqlComm(DateTime? b, DateTime c)
         {
             try
             {
-                
-                if (IfSpecExam.IsChecked == true && DiscTypeCb.SelectedIndex !=-1) // если специальный экзамен, тогда в таблицу добавляется экзамен с поправкой на вид дисциплины
+
+                if (IfSpecExam.IsChecked == true && DiscTypeCb.SelectedIndex != -1) // если специальный экзамен, тогда в таблицу добавляется экзамен с поправкой на вид дисциплины
                 {
-                    
+
                     MySqlCommand InsertCommand = new MySqlCommand("INSERT INTO examlistsregist (ExamListsRegistTeacherid, ExamListsRegistTeacherid2, ExamListsModuleId, ExamListsSpecialDisciplineId," +
                     " ExamListsSecondSpecialDisciplineId, ExamListsRegistStudid, examlistsregistTypeOfExam, DateOfApproving, ExpirationDate, ExamListsHeadMasterId)" +
                     " VALUES(@ExamListsRegistTeacherid, @ExamListsRegistTeacherid2, @ExamListsModuleId," +
@@ -288,7 +286,7 @@ namespace ExamDoc
                     InsertCommand.Parameters.AddWithValue("@ExamListsSpecialDisciplineId", DiscTypeCb.SelectedIndex + 1); // ид УП ПП ...
                     if (CheckForSecondDiscipline.IsChecked == true) // при наличии второго особого "экзамена"
                     {
-                        InsertCommand.Parameters.AddWithValue("@ExamListsSecondSpecialDisciplineId", DiscTypeCb2.SelectedIndex + 1); // ид УП ПП ...
+                        InsertCommand.Parameters.AddWithValue("@ExamListsSecondSpecialDisciplineId", DiscTypeCb2.SelectedIndex + 2); // ид УП ПП ...
                     }
                     else
                         InsertCommand.Parameters.AddWithValue("@ExamListsSecondSpecialDisciplineId", null); // ид УП ПП ...
@@ -356,7 +354,7 @@ namespace ExamDoc
                     InsertCommand.ExecuteNonQuery();
                     System.Windows.MessageBox.Show("Данные по пересдаче добавлены!");
                 }
-              
+
             }
             catch (Exception ex)
             {
@@ -370,26 +368,14 @@ namespace ExamDoc
         {
             DateTime? DT = DateOfExamCalendar.SelectedDate;
             DateTime Today = DateTime.Today;
-            // а, всё ж можно сделать куда элегантнее. Я ж из комбобоксов значения беру. Вместо того, чтобы делать лишние структуры, можно просто индексами боксов воспользоваться. BigBrain
-            //if (StudDisciplCb2.SelectedIndex == -1) // здесь на случай, если на одну дисциплину лист пересдачи. Да и вообще, вынести исполнение sql команды в отдельный метод, передав подобие флага как аргумент, чтобы было понятно по какому кол-ву дисциплин работать
-            //{
-            //    /// упд: не сработает с Заведующим, т.к. в списке будет их мало, а заведующие находятся с учителями вместе, но показываются в списке только заведующие. Кароч, не пошаманить с селектед индекс
-            //    /// /// упд упд: нашел способ исправить это через индексы
-            //    ExecSqlComm(true, DT, Today);
-            //}
-            //else
-            //{
-            //    ExecSqlComm(false, DT, Today);
-            //}
-            //
             ExecSqlComm(DT, Today);
-            if(IfSpecExam.IsChecked == true)
+            if (IfSpecExam.IsChecked == true)
             {
                 ForFrames.MyFrames.Navigate(new ShablonLista());
 
             }
             else
-            ForFrames.MyFrames.Navigate(new ShablonLista());
+                ForFrames.MyFrames.Navigate(new ShablonLista());
         }
         /// <summary>
         /// подключение к БД ака основной метод, где вложена куча операций, для предварительного вывода данных из БД
@@ -401,7 +387,7 @@ namespace ExamDoc
             ForStudFLPNames.Text = Search_Name.Text;
             Search_Name.Clear();
             try
-            {                            
+            {
                 string QueryForGroupDeclare = "SELECT * FROM groupslist";
                 MySqlCommand Declare = new MySqlCommand(QueryForGroupDeclare, BaseConn.BuildConnection);
                 MySqlDataReader DataRead = Declare.ExecuteReader();
@@ -630,7 +616,7 @@ namespace ExamDoc
             DTable = new DataTable();
             DTable.Load(DataReader);
             DataRowCollection ToSrchTypes = DTable.Rows;
-                if(DiscT.Count ==0) // условие, дабы избежать повторения позиций
+            if (DiscT.Count == 0) // условие, дабы избежать повторения позиций
             {
                 foreach (DataRow D in ToSrchTypes) // добавляю новую позицию в лист
                 {
@@ -647,9 +633,9 @@ namespace ExamDoc
                     DiscTypeCb.Items.Add(str.disctypedescr);
                     DiscTypeCb2.Items.Add(str.disctypedescr);
                 }
-            }       
+            }
             ForSpecialDisciplines.Visibility = Visibility.Visible;
-            
+
         }
 
         private void IfSpecExam_Unchecked(object sender, RoutedEventArgs e)
@@ -705,8 +691,18 @@ namespace ExamDoc
             // здесь вызвать обработчик предыдущего события IfSpecExam_Checked, чтобы снова добавить в комбобокс данные, т.к. они будут, в последствии, удаляться
             if (DiscTypeCb.SelectedIndex != -1)
             {
+                DiscTypeCb2.Items.Clear();
                 string str = DiscTypeCb.SelectedItem.ToString();
-                DiscTypeCb2.Items.Remove(str); // как  тебе такое, Илон Маск?
+                //DiscTypeCb2.Items.Remove(str); // как  тебе такое, Илон Маск?
+                string[] a = new string[3];
+                DiscTypeCb.Items.CopyTo(a, 0);
+                for (int i = 0; i < a.Length; i++)
+                {
+                    if (a[i] != str)
+                    {
+                        DiscTypeCb2.Items.Add(a[i]);
+                    }
+                }
             }
         }
     }
