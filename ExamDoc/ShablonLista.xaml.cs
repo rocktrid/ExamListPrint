@@ -1,28 +1,17 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.IO.Packaging;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Forms;
-using System.IO.Packaging;
-using System.IO;
-using PdfSharp.Xps;
-using PdfSharp;
-using System.Printing;
+using System.Windows.Media;
 using System.Windows.Xps;
 using System.Windows.Xps.Packaging;
-using MySql.Data.MySqlClient;
-using System.Data;
-using System.Drawing.Printing;
 namespace ExamDoc
 {
     /// <summary>
@@ -94,7 +83,7 @@ namespace ExamDoc
             }
             try
             {
-                if(ExDt[0].ExamListsSecondSpecialDisciplineId != null) //присутствует два модуля
+                if (ExDt[0].ExamListsSecondSpecialDisciplineId != null) //присутствует два модуля
                 {
                     // тут два модуля выводятся в одну строку
                     // выводится тип предмета УП ПП и пр
@@ -115,13 +104,13 @@ namespace ExamDoc
                         if ((int)O[0] == ExDt[0].ExamListsSpecialDisciplineId)
                         {
                             DisciplineData.Text += " " + (string)O[1] + ",";
-                        }                       
+                        }
                     }
                     DSearch.Close();
                     DTable.Clear();
                     DisciplinesFind.Clear(); // чищу, т.к. оно пригодится после, дабы не вводить новые переменные в одном отдельном куске кода
                     //выводится код ПМа
-                    Query = "SELECT idmodules, modulesdescr FROM modules"; 
+                    Query = "SELECT idmodules, modulesdescr FROM modules";
                     DisciplinesSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
                     DSearch = DisciplinesSearch.ExecuteReader();
                     DTable = new DataTable();
@@ -133,10 +122,10 @@ namespace ExamDoc
                         if ((int)O[0] == ExDt[0].ExamListsModuleId)
                         {
                             DisciplineData.Text = DisciplineData.Text.Remove(DisciplineData.Text.Length - 1);
-                            DisciplineData.Text += " "+(string)O[1];
+                            DisciplineData.Text += " " + (string)O[1];
                         }
                     }
-                    if(ExDt[0].ExamListsRegistTeacherid2 != null) // если несколько преподов принимают пересдачу
+                    if (ExDt[0].ExamListsRegistTeacherid2 != null) // если несколько преподов принимают пересдачу
                     {
                         IfTwoExaminators.Visibility = Visibility.Visible;
                         FirstExaminator.Text += " #1";
@@ -154,7 +143,7 @@ namespace ExamDoc
                             {
                                 TeacherData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
                             }
-                            if((int)O[0] == ExDt[0].ExamListsRegistTeacherid2)
+                            if ((int)O[0] == ExDt[0].ExamListsRegistTeacherid2)
                             {
                                 TeacherData1.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
                             }
@@ -177,7 +166,7 @@ namespace ExamDoc
                                 TeacherData.Text = (string)O[1] + " " + (string)O[2] + " " + (string)O[3];
                             }
                         }
-                    }                  
+                    }
                     Query = "SELECT * FROM teacherlist";
                     MySqlCommand HeadMasterSearch = new MySqlCommand(Query, BaseConn.BuildConnection);
                     MySqlDataReader HeadSearch = HeadMasterSearch.ExecuteReader();
@@ -333,12 +322,11 @@ namespace ExamDoc
             {
                 System.Windows.MessageBox.Show("" + ex);
             }
-            }
+        }
 
         // Конверт из wpf В xps данный метод с конвертации я заменю сразу на печать документа
         private void Print_Click(object sender, RoutedEventArgs e)
         {
-            int pagenumber; // для печати нескольких страниц на один документ
             string name = "Табаков допуск";
             // Send to the printer.
             SaveToPDF.Visibility = Visibility.Collapsed;
@@ -393,7 +381,7 @@ namespace ExamDoc
             SaveFileDialog SaveFile = new SaveFileDialog
             {
                 Filter = "PDF (*.pdf)|*.pdf",
-                FileName = "Допуск на пересдачу" +" "+ StudName + ".pdf"
+                FileName = "Допуск на пересдачу" + " " + StudName + ".pdf"
             };
             if (SaveFile.ShowDialog() == DialogResult.OK)
             {

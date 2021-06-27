@@ -1,28 +1,9 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Forms;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.IO.Packaging;
-using System.IO;
-using PdfSharp.Xps;
-using PdfSharp;
-using System.Printing;
-using System.Windows.Xps;
-using System.Windows.Xps.Packaging;
-using MySql.Data.MySqlClient;
 using System.Data;
-using System.Data.SqlClient;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace ExamDoc
 {
@@ -246,7 +227,9 @@ namespace ExamDoc
                         StudExamPersonTb.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
                     }
                     else
+                    {
                         StudExamPersonTb1.Items.Add(Teachers[i].Fname + " " + Teachers[i].Lname + " " + Teachers[i].Patronymic);
+                    }
                 }
 
             }
@@ -289,7 +272,9 @@ namespace ExamDoc
                         InsertCommand.Parameters.AddWithValue("@ExamListsSecondSpecialDisciplineId", DiscTypeCb2.SelectedIndex + 2); // ид УП ПП ...
                     }
                     else
+                    {
                         InsertCommand.Parameters.AddWithValue("@ExamListsSecondSpecialDisciplineId", null); // ид УП ПП ...
+                    }
 
                     for (int i = 0; i < Teachers.Count; i++)
                     {
@@ -375,7 +360,9 @@ namespace ExamDoc
 
             }
             else
+            {
                 ForFrames.MyFrames.Navigate(new ShablonLista());
+            }
         }
         /// <summary>
         /// подключение к БД ака основной метод, где вложена куча операций, для предварительного вывода данных из БД
