@@ -8,13 +8,25 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		ForReleasingProjects|Any CPU = ForReleasingProjects|Any CPU
+		ForReleasingProjects|x64 = ForReleasingProjects|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.Debug|x64.ActiveCfg = Debug|x64
+		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.Debug|x64.Build.0 = Debug|x64
+		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.ForReleasingProjects|Any CPU.ActiveCfg = ForReleasingProjects|Any CPU
+		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.ForReleasingProjects|Any CPU.Build.0 = ForReleasingProjects|Any CPU
+		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.ForReleasingProjects|x64.ActiveCfg = ForReleasingProjects|x64
+		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.ForReleasingProjects|x64.Build.0 = ForReleasingProjects|x64
 		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.Release|x64.ActiveCfg = Release|x64
+		{0C1F33D7-C283-41D3-AE8F-59EF186429B2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

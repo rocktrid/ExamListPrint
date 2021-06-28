@@ -18,7 +18,7 @@
                 <TextBlock Name="ForTextExceptions" HorizontalAlignment="Center" Visibility="Collapsed"/>
                 <Button Name="Check_Name" Content="Начать" Click="Check_Name_Click" Width="100" Height="40" Margin="0,20,0,20"/>
             </StackPanel>
-            <StackPanel Name="FormStackPan" Orientation="Vertical" Visibility="Visible">
+            <StackPanel Name="FormStackPan" Orientation="Vertical" Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Вид" Margin="0,0,160,0" Padding="5"/>
                     <TextBlock Name="TypeOfExam" Width="100"/>
