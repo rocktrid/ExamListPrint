@@ -13,7 +13,7 @@ namespace ExamDoc
     public partial class ExamListPg : Page
     {
         // собснно, сам адрес сервера.
-        private readonly string OpenConnection = "server=ngknn.ru; port=20009; port =20009; user=allowed; database=allowed; User Id = allowed; Password = KemOW4seYumi";
+        private readonly string OpenConnection = "" ;// here's my college log/password data
 
         // сохранить id чтобы проверить его в таблице с переэкзаменовками и для получения наименования группы
         public int IdStudent;
